@@ -13,44 +13,22 @@ DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 MAX_SECONDS_DATA_STORAGE = 30
 MAX_LEN_DATA_STORAGE = 30
 
-
+#$
 def handleTimestampInData(data):
     if 'timestamp' not in data:
         data['timestamp'] = datetime.datetime.now()
     else:
         data['timestamp'] = dateutil.parser.parse(data['timestamp'])
     return data
-
-def storeRawDataInDB(session, data):
-    global elapsed_time, data_storage, qhawax_storage
-    if elapsed_time is None:
-        elapsed_time = time.time()
-    
-    if time.time() - elapsed_time >= MAX_SECONDS_DATA_STORAGE or len(data_storage) >= MAX_LEN_DATA_STORAGE:
-        for raw_measurement in data_storage:
-            session.add(raw_measurement)
-        session.commit()
-
-        data_storage = []
-        elapsed_time = time.time()
-    
-    qhawax_name = data.pop('ID', None)
-    if qhawax_name not in qhawax_storage:
-        qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()
-        qhawax_storage[qhawax_name] = qhawax_id[0]
-    
-    raw_measurement = RawMeasurement(**data, qhawax_id=qhawax_storage[qhawax_name])
-
-    data_storage.append(raw_measurement)
-
+#$
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
-    
     processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
     session.add(processed_measurement)
     session.commit()
 
+#$ esto es del script
 def storeAirQualityDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
@@ -63,31 +41,13 @@ def storeAirQualityDataInDB(session, data):
     session.add(air_quality_measurement)
     session.commit()
 
-def queryDBRaw(session, qhawax_name, initial_timestamp, final_timestamp):
+#$
+def queryDBNextProcessedMeasurement(session, qhawax_name, lastID):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
     if qhawax_id is None:
         return None
 
-    sensors = (RawMeasurement.CO_OP1, RawMeasurement.CO_OP2, RawMeasurement.CO2, RawMeasurement.H2S_OP1, 
-                RawMeasurement.H2S_OP2, RawMeasurement.NO_OP1, RawMeasurement.NO_OP2, RawMeasurement.NO2_OP1, 
-                RawMeasurement.NO2_OP2, RawMeasurement.O3_OP1, RawMeasurement.O3_OP2, RawMeasurement.PM1, 
-                RawMeasurement.PM25, RawMeasurement.PM10, RawMeasurement.SO2_OP1, RawMeasurement.SO2_OP2, 
-                RawMeasurement.VOC_OP1, RawMeasurement.VOC_OP2, RawMeasurement.UV, RawMeasurement.UVA, 
-                RawMeasurement.UVB, RawMeasurement.spl, RawMeasurement.humidity, RawMeasurement.pressure, 
-                RawMeasurement.temperature, RawMeasurement.lat, RawMeasurement.lon, RawMeasurement.alt, 
-                RawMeasurement.timestamp)
-    
-    return session.query(*sensors).filter(RawMeasurement.qhawax_id == qhawax_id). \
-                                    filter(RawMeasurement.timestamp > initial_timestamp). \
-                                    filter(RawMeasurement.timestamp < final_timestamp). \
-                                    order_by(RawMeasurement.timestamp).all()
-
-def queryDBRealTimeProcessed(session, qhawax_name):
-    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
-    if qhawax_id is None:
-        return None
-
-    sensors = (ProcessedMeasurement.CO, ProcessedMeasurement.CO2, ProcessedMeasurement.H2S, ProcessedMeasurement.NO,
+    sensors = (ProcessedMeasurement.id, ProcessedMeasurement.CO, ProcessedMeasurement.CO2, ProcessedMeasurement.H2S, ProcessedMeasurement.NO,
                 ProcessedMeasurement.NO2, ProcessedMeasurement.O3, ProcessedMeasurement.PM1, ProcessedMeasurement.PM25,
                 ProcessedMeasurement.PM10, ProcessedMeasurement.SO2, ProcessedMeasurement.VOC, ProcessedMeasurement.UV,
                 ProcessedMeasurement.UVA, ProcessedMeasurement.UVB, ProcessedMeasurement.spl, ProcessedMeasurement.humidity,
@@ -95,7 +55,24 @@ def queryDBRealTimeProcessed(session, qhawax_name):
                 ProcessedMeasurement.lon, ProcessedMeasurement.alt, ProcessedMeasurement.timestamp)
 
     return session.query(*sensors).filter(ProcessedMeasurement.qhawax_id == qhawax_id). \
-                                    order_by(desc(ProcessedMeasurement.timestamp)).limit(10).all()
+                                   filter(ProcessedMeasurement.id > lastID). \
+                                   order_by(ProcessedMeasurement.timestamp.desc()).limit(10).all()
+
+#$
+def queryDBRealTimeProcessed(session, qhawax_name):
+    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
+    if qhawax_id is None:
+        return None
+
+    sensors = (ProcessedMeasurement.id, ProcessedMeasurement.CO, ProcessedMeasurement.CO2, ProcessedMeasurement.H2S, ProcessedMeasurement.NO,
+                ProcessedMeasurement.NO2, ProcessedMeasurement.O3, ProcessedMeasurement.PM1, ProcessedMeasurement.PM25,
+                ProcessedMeasurement.PM10, ProcessedMeasurement.SO2, ProcessedMeasurement.VOC, ProcessedMeasurement.UV,
+                ProcessedMeasurement.UVA, ProcessedMeasurement.UVB, ProcessedMeasurement.spl, ProcessedMeasurement.humidity,
+                ProcessedMeasurement.pressure, ProcessedMeasurement.temperature, ProcessedMeasurement.lat,
+                ProcessedMeasurement.lon, ProcessedMeasurement.alt, ProcessedMeasurement.timestamp)
+
+    return session.query(*sensors).filter(ProcessedMeasurement.qhawax_id == qhawax_id). \
+                                    order_by(ProcessedMeasurement.timestamp.desc()).limit(10).all()
 
 def queryDBProcessed(session, qhawax_name, initial_timestamp, final_timestamp):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
@@ -112,7 +89,7 @@ def queryDBProcessed(session, qhawax_name, initial_timestamp, final_timestamp):
     return session.query(*sensors).filter(ProcessedMeasurement.qhawax_id == qhawax_id). \
                                     filter(ProcessedMeasurement.timestamp > initial_timestamp). \
                                     filter(ProcessedMeasurement.timestamp < final_timestamp). \
-                                    order_by(ProcessedMeasurement.timestamp).limit(10).all()
+                                    order_by(ProcessedMeasurement.timestamp).all()
 
 def queryDBAirQuality(session, qhawax_name, initial_timestamp, final_timestamp):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
@@ -192,13 +169,9 @@ def getLocationFromProductID(session, qhawax_id):
     return qhawax_location[0]
 
 def getOffsetsFromProductID(session, qhawax_id):
-    print('Entre a getOffsetsFromProductID')
-    print(qhawax_id)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_id).one()[0]
-    print(qhawax_id)
     attributes = (GasSensor.type, GasSensor.WE, GasSensor.AE, GasSensor.sensitivity)
     sensors = session.query(*attributes).filter_by(qhawax_id=qhawax_id).all()
-    print(sensors)
 
     offsets = {}
     for sensor in sensors:
@@ -333,8 +306,6 @@ def queryDBPROM(session, qhawax_name, sensor, initial_timestamp, final_timestamp
                                       filter(AirQualityMeasurement.timestamp > initial_timestamp). \
                                       filter(AirQualityMeasurement.timestamp < final_timestamp). \
                                       order_by(AirQualityMeasurement.timestamp).all()
-
-
     sum = 0        
 
     if len(resultado) == 0 :

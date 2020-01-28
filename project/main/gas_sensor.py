@@ -33,11 +33,6 @@ def requestNonControlledOffsets():
     non_controlled_offsets = utils.getNonControlledOffsetsFromProductID(db.session, qhawax_id)
     return make_response(jsonify(non_controlled_offsets), 200)
 
-#http://0.0.0.0:8888/api/request_offsets/?ID=qH006
-#http://0.0.0.0:8888/api/request_controlled_offsets/?ID=qH006
-#http://0.0.0.0:8888/api/request_non_controlled_offsets/?ID=qH006
-
-
 @app.route('/api/save_offsets/', methods=['POST'])
 def saveOffsets():
     req_json = request.get_json()
