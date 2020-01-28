@@ -17,7 +17,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 migrate = Migrate(app, db)
 
-from project.main import gas_sensor, processed_measurement
+from project.main import gas_sensor, processed_measurement, qhawax
 import project.database.models as models
 from project.database.models import Company, User, Qhawax , ProcessedMeasurement
 

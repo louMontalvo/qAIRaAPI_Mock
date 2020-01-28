@@ -118,6 +118,7 @@ class GasSensor(db.Model):
     WE = db.Column(db.Float)
     AE = db.Column(db.Float)
     sensitivity = db.Column(db.Float)
+    sensitivity_2 = db.Column(db.Float)
     C2 = db.Column(db.Float, nullable=False, default=0, server_default='0')
     C1 = db.Column(db.Float, nullable=False, default=1, server_default='1')
     C0 = db.Column(db.Float, nullable=False, default=0, server_default='0')
@@ -133,7 +134,8 @@ class GasSensor(db.Model):
             'type': self.type,
             'WE': self.WE,
             'AE': self.AE,
-            'sensitivity': self.sensitivity
+            'sensitivity': self.sensitivity,
+            'sensitivity_2': self.sensitivit_2
         }
 
 class ProcessedMeasurement(db.Model):

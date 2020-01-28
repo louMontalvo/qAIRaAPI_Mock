@@ -1,7 +1,5 @@
 from flask import jsonify, make_response, redirect, render_template, \
     request, url_for
-from flask_login import current_user, login_required, login_user, logout_user
-from flask_socketio import join_room
 import datetime
 import dateutil.parser
 import dateutil.tz
@@ -15,9 +13,7 @@ from sqlalchemy import or_
 
 @app.route('/api/request_offsets/', methods=['GET'])
 def requestOffsets():
-    print('Entre a requestOffsets')
     qhawax_id = request.args.get('ID')
-    print(qhawax_id)
     offsets = utils.getOffsetsFromProductID(db.session, qhawax_id)
     return make_response(jsonify(offsets), 200)
 

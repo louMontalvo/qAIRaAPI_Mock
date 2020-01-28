@@ -170,7 +170,7 @@ def getLocationFromProductID(session, qhawax_id):
 
 def getOffsetsFromProductID(session, qhawax_id):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_id).one()[0]
-    attributes = (GasSensor.type, GasSensor.WE, GasSensor.AE, GasSensor.sensitivity)
+    attributes = (GasSensor.type, GasSensor.WE, GasSensor.AE, GasSensor.sensitivity, GasSensor.sensitivity_2)
     sensors = session.query(*attributes).filter_by(qhawax_id=qhawax_id).all()
 
     offsets = {}
