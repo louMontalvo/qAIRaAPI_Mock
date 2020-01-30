@@ -21,12 +21,94 @@ def handleTimestampInData(data):
         data['timestamp'] = dateutil.parser.parse(data['timestamp'])
     return data
 #$
+
+def checkFields(data):
+
+    if(((data['lat'] < -90.0) and (data['lat'] > 90.0)) and ((data['lon'] < -180.0) or (data['lon'] > 180.0))):
+        return False
+
+    if(data['CO']):
+        if(data['CO']<0):
+            return False
+
+    #if(data['CO2']):
+    #    if(data['CO2']<0):
+    #        return False
+
+    if(data['H2S']):
+        if(data['H2S']<0):
+            return False
+
+    #if(data['NO']):
+    #    if(data['NO']<0):
+    #        return False
+
+    if(data['NO2']):
+        if(data['NO2']<0):
+            return False
+
+    if(data['O3']):
+        if(data['O3']<0):
+            return False
+
+    if(data['PM1']):
+        if(data['PM1']<0):
+            return False
+
+    if(data['PM25']):
+        if(data['PM25']<0):
+            return False
+
+    if(data['PM10']):
+        if(data['PM10']<0):
+            return False
+
+    if(data['SO2']):
+        if(data['SO2']<0):
+            return False
+
+    #if(data['VOC']):
+    #    if(data['VOC']<0):
+    #        return False
+
+    #if(data['UV']):
+    #    if(data['UV']<0):
+    #        return False
+
+    #if(data['UVA']):
+    #    if(data['UVA']<0):
+    #        return False
+
+    #if(data['UVB']):
+    #    if(data['UVB']<0):
+    #        return False
+
+    #if(data['spl']):
+    #    if(data['spl']<0):
+    #        return False
+
+    if(data['humidity']):
+        if(data['humidity']<0):
+            return False
+
+    if(data['pressure']):
+        if(data['pressure']<0):
+            return False
+
+    if(data['temperature']):
+        if(data['temperature']<0):
+            return False
+   
+    return True
+
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
-    processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
-    session.add(processed_measurement)
-    session.commit()
+
+    if(checkFields(data)):
+        processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
+        session.add(processed_measurement)
+        session.commit()
 
 #$ esto es del script
 def storeAirQualityDataInDB(session, data):
@@ -245,6 +327,11 @@ def saveNonControlledOffsetsFromProductID(session, qhawax_id, non_controlled_off
     for sensor_type in non_controlled_offsets:
         session.query(GasSensor).filter_by(qhawax_id=qhawax_id, type=sensor_type).update(values=non_controlled_offsets[sensor_type])
     
+    session.commit()
+
+def saveLocationFromProductID(session, qhawax_id, lat, lon):
+    new_location = Location(lat=lat, lon=lon)
+    session.query(Qhawax).filter_by(name=qhawax_id).update(values={'_location': new_location.serialize})
     session.commit()
 
 def updateMainIncaInDB(session, new_main_inca, qhawax_name):

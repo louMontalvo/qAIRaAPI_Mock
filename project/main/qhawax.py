@@ -44,3 +44,17 @@ def getOneQhawaxMiraflores():
         'main_aqi': qhawax.main_aqi,
         'main_inca': qhawax.main_inca } for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
+
+@app.route('/api/save_location/', methods=['POST'])
+def saveLocation():
+    req_json = request.get_json()
+    try:
+        qhawax_id = str(req_json['product_id']).strip()
+        lat = float(req_json['lat'])
+        lon = float(req_json['lon'])
+    except KeyError as e:
+        json_message = jsonify({'error': 'Parameter \'%s\' is missing in JSON object' % (e)})
+        return make_response(json_message, 400)
+    
+    utils.saveLocationFromProductID(db.session, qhawax_id, lat, lon)
+    return make_response('Success', 200)
