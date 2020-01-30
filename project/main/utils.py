@@ -138,7 +138,7 @@ def queryDBNextProcessedMeasurement(session, qhawax_name, lastID):
 
     return session.query(*sensors).filter(ProcessedMeasurement.qhawax_id == qhawax_id). \
                                    filter(ProcessedMeasurement.id > lastID). \
-                                   order_by(ProcessedMeasurement.timestamp.desc()).limit(10).all()
+                                   order_by(ProcessedMeasurement.timestamp.desc()).limit(10000).all()
 
 #$
 def queryDBRealTimeProcessed(session, qhawax_name):
@@ -153,8 +153,7 @@ def queryDBRealTimeProcessed(session, qhawax_name):
                 ProcessedMeasurement.pressure, ProcessedMeasurement.temperature, ProcessedMeasurement.lat,
                 ProcessedMeasurement.lon, ProcessedMeasurement.alt, ProcessedMeasurement.timestamp)
 
-    return session.query(*sensors).filter(ProcessedMeasurement.qhawax_id == qhawax_id). \
-                                    order_by(ProcessedMeasurement.timestamp.desc()).limit(10).all()
+    return session.query(*sensors).order_by(ProcessedMeasurement.timestamp.desc()).limit(10000).all()
 
 def queryDBProcessed(session, qhawax_name, initial_timestamp, final_timestamp):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
@@ -307,7 +306,7 @@ def saveLocationFromProductID(session, qhawax_id, lat, lon):
 
 def saveOffsetsFromProductID(session, qhawax_id, offsets):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_id).one()[0]
-
+    print(qhawax_id)
     for sensor_type in offsets:
         session.query(GasSensor).filter_by(qhawax_id=qhawax_id, type=sensor_type).update(values=offsets[sensor_type])
 

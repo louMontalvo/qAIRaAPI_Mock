@@ -25,8 +25,6 @@ def handleNewData():
         print(e)
         return make_response('Invalid format', 400)
 
-#http://0.0.0.0:8888/api/dataProcessed/
-
 @app.route('/api/processed_measurements_realtime/', methods=['GET'])
 def getProcessedMeasurementsLastRows():
     lastID = request.args.get('ID')
@@ -44,7 +42,6 @@ def getProcessedMeasurementsLastRows():
         return make_response(jsonify(processed_measurements_list), 200)
     return make_response(jsonify('Measurements not found'), 404)
 
-#http://0.0.0.0:8888/api/processed_measurements_realtime/?ID=395153&name=qH011
 
 @app.route('/api/processed_measurements_period/', methods=['GET'])
 def getProcessedMeasurementsTimePeriod():
@@ -59,5 +56,3 @@ def getProcessedMeasurementsTimePeriod():
         averaged_measurements_list = utils.averageMeasurementsInHours(processed_measurements_list, initial_timestamp, final_timestamp, 1)
         return make_response(jsonify(averaged_measurements_list), 200)
     return make_response(jsonify('Measurements not found'), 404)
-
-#http://0.0.0.0:8888/api/processed_measurements_period/?name=qH011&initial_timestamp=Tue, 27 Jan 2020 17:03:58 GMT&final_timestamp=Tue, 28 Jan 2020 17:03:58 GMT

@@ -45,6 +45,16 @@ def getOneQhawaxMiraflores():
         'main_inca': qhawax.main_inca } for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
+@app.route('/api/get_all_qhawax/', methods=['GET'])
+def getAllQhawax():
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca).order_by(Qhawax.name).all()
+    qhawax_list = [
+        {'name': qhawax.name, 
+        'location': qhawax._location,
+        'main_aqi': qhawax.main_aqi,
+        'main_inca': qhawax.main_inca } for qhawax in all_qhawax]
+    return make_response(jsonify(qhawax_list), 200)
+
 @app.route('/api/save_location/', methods=['POST'])
 def saveLocation():
     req_json = request.get_json()
@@ -58,3 +68,21 @@ def saveLocation():
     
     utils.saveLocationFromProductID(db.session, qhawax_id, lat, lon)
     return make_response('Success', 200)
+
+@app.route('/api/save_main_inca/', methods=['POST'])
+def updateIncaData():
+    req_json = request.get_json()
+    try:
+        name = str(req_json['name']).strip()
+        data_json = req_json['value_inca']
+        utils.updateMainIncaInDB(db.session, data_json, name)
+        return make_response('OK', 200)
+    except Exception as e:
+        print(e)
+        return make_response('Invalid format. Exception="%s"' % (e), 400)
+
+
+@app.route('/api/request_all_locations/', methods=['GET'])
+def requestAllLocations():
+    locations = utils.getAllLocations(db.session)
+    return make_response(jsonify(locations), 200)

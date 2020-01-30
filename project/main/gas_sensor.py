@@ -42,4 +42,29 @@ def saveOffsets():
     utils.saveOffsetsFromProductID(db.session, qhawax_id, offsets)
     return make_response('Success', 200)
 
+@app.route('/api/save_controlled_offsets/', methods=['POST'])
+def saveControlledOffsets():
+    req_json = request.get_json()
+    try:
+        qhawax_id = str(req_json['product_id']).strip()
+        controlled_offsets = req_json['controlled_offsets']
+    except KeyError as e:
+        json_message = jsonify({'error': 'Parameter \'%s\' is missing in JSON object' % (e)})
+        return make_response(json_message, 400)
+
+    utils.saveControlledOffsetsFromProductID(db.session, qhawax_id, controlled_offsets)
+    return make_response('Success', 200)
+
+@app.route('/api/save_non_controlled_offsets/', methods=['POST'])
+def saveNonControlledOffsets():
+    req_json = request.get_json()
+    try:
+        qhawax_id = str(req_json['product_id']).strip()
+        non_controlled_offsets = req_json['non_controlled_offsets']
+    except KeyError as e:
+        json_message = jsonify({'error': 'Parameter \'%s\' is missing in JSON object' % (e)})
+        return make_response(json_message, 400)
+
+    utils.saveNonControlledOffsetsFromProductID(db.session, qhawax_id, non_controlled_offsets)
+    return make_response('Success', 200)
 
