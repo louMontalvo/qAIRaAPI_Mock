@@ -55,6 +55,16 @@ def getAllQhawax():
         'main_inca': qhawax.main_inca } for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
+@app.route('/api/get_active_qhawax/', methods=['GET'])
+def getActiveQhawax():
+    all_active_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca).order_by(Qhawax.name).filter((Qhawax.state == 'ON')).all()
+    qhawax_list = [
+        {'name': qhawax.name, 
+        'location': qhawax._location,
+        'main_aqi': qhawax.main_aqi,
+        'main_inca': qhawax.main_inca } for qhawax in all_active_qhawax]
+    return make_response(jsonify(qhawax_list), 200)
+
 @app.route('/api/save_location/', methods=['POST'])
 def saveLocation():
     req_json = request.get_json()

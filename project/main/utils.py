@@ -3,7 +3,7 @@ import dateutil
 import dateutil.parser
 import time
 
-from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax
+from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement
 from project.database.utils import Location
 
 elapsed_time = None
@@ -101,6 +101,27 @@ def checkFields(data):
    
     return True
 
+def storeRawDataInDB(session, data):
+    global elapsed_time, data_storage, qhawax_storage
+    if elapsed_time is None:
+        elapsed_time = time.time()
+    if time.time() - elapsed_time >= MAX_SECONDS_DATA_STORAGE or len(data_storage) >= MAX_LEN_DATA_STORAGE:
+        for raw_measurement in data_storage:
+            session.add(raw_measurement)
+        session.commit()
+
+        data_storage = []
+        elapsed_time = time.time()
+    
+    qhawax_name = data.pop('ID', None)
+    if qhawax_name not in qhawax_storage:
+        qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()
+        qhawax_storage[qhawax_name] = qhawax_id[0]
+    
+    raw_measurement = RawMeasurement(**data, qhawax_id=qhawax_storage[qhawax_name])
+    data_storage.append(raw_measurement)
+
+
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
@@ -139,6 +160,24 @@ def queryDBNextProcessedMeasurement(session, qhawax_name, lastID):
     return session.query(*sensors).filter(ProcessedMeasurement.qhawax_id == qhawax_id). \
                                    filter(ProcessedMeasurement.id > lastID). \
                                    order_by(ProcessedMeasurement.timestamp.desc()).limit(10000).all()
+
+def queryDBRaw(session, qhawax_name, initial_timestamp, final_timestamp):
+    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
+    if qhawax_id is None:
+        return None
+
+    sensors = (RawMeasurement.CO_OP1, RawMeasurement.CO_OP2, RawMeasurement.CO2, RawMeasurement.H2S_OP1, 
+                RawMeasurement.H2S_OP2, RawMeasurement.NO_OP1, RawMeasurement.NO_OP2, RawMeasurement.NO2_OP1, 
+                RawMeasurement.NO2_OP2, RawMeasurement.O3_OP1, RawMeasurement.O3_OP2, RawMeasurement.PM1, 
+                RawMeasurement.PM25, RawMeasurement.PM10, RawMeasurement.SO2_OP1, RawMeasurement.SO2_OP2, 
+                RawMeasurement.VOC_OP1, RawMeasurement.VOC_OP2, RawMeasurement.UV, RawMeasurement.UVA, 
+                RawMeasurement.UVB, RawMeasurement.spl, RawMeasurement.humidity, RawMeasurement.pressure, 
+                RawMeasurement.temperature, RawMeasurement.lat, RawMeasurement.lon, RawMeasurement.alt, 
+                RawMeasurement.timestamp)
+    return session.query(*sensors).filter(RawMeasurement.qhawax_id == qhawax_id). \
+                                    filter(RawMeasurement.timestamp > initial_timestamp). \
+                                    filter(RawMeasurement.timestamp < final_timestamp). \
+                                    order_by(RawMeasurement.timestamp).all()
 
 #$
 def queryDBRealTimeProcessed(session, qhawax_name):
@@ -253,39 +292,49 @@ def getOffsetsFromProductID(session, qhawax_id):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_id).one()[0]
     attributes = (GasSensor.type, GasSensor.WE, GasSensor.AE, GasSensor.sensitivity, GasSensor.sensitivity_2)
     sensors = session.query(*attributes).filter_by(qhawax_id=qhawax_id).all()
+    all_sensors=['CO','SO2','H2S','O3','NO','NO2']
 
-    offsets = {}
+    initial_offsets = {}
+    for sensor in all_sensors:
+        initial_offsets[sensor] = {'WE': 0.0, 'AE': 0.0, 'sensitivity': 0.0, 'sensitivity_2': 0.0}
+
     for sensor in sensors:
         sensor_dict = sensor._asdict()
-        offsets[sensor_dict.pop('type')] = sensor_dict
-    
-    return offsets
+        initial_offsets[sensor_dict.pop('type')] = sensor_dict
+
+    return initial_offsets
     
 def getControlledOffsetsFromProductID(session, qhawax_id):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_id).one()[0]
-
     attributes = (GasSensor.type, GasSensor.C2, GasSensor.C1, GasSensor.C0)
     sensors = session.query(*attributes).filter_by(qhawax_id=qhawax_id).all()
+    all_sensors=['CO','SO2','H2S','O3','NO','NO2']
 
-    controlled_offsets = {}
+    initial_offsets = {}
+    for sensor in all_sensors:
+        initial_offsets[sensor] = {'C0': 0.0, 'C1': 0.0, 'C2': 0.0}
+
     for sensor in sensors:
         sensor_dict = sensor._asdict()
-        controlled_offsets[sensor_dict.pop('type')] = sensor_dict
+        initial_offsets[sensor_dict.pop('type')] = sensor_dict
     
-    return controlled_offsets
+    return initial_offsets
 
 def getNonControlledOffsetsFromProductID(session, qhawax_id):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_id).one()[0]
 
     attributes = (GasSensor.type, GasSensor.NC1, GasSensor.NC0)
     sensors = session.query(*attributes).filter_by(qhawax_id=qhawax_id).all()
+    all_sensors=['CO','SO2','H2S','O3','NO','NO2']
 
-    non_controlled_offsets = {}
+    initial_offsets = {}
+    for sensor in all_sensors:
+        initial_offsets[sensor] = {'NC1': 0.0, 'NC0': 0.0}
+
     for sensor in sensors:
         sensor_dict = sensor._asdict()
-        non_controlled_offsets[sensor_dict.pop('type')] = sensor_dict
-    
-    return non_controlled_offsets
+        initial_offsets[sensor_dict.pop('type')] = sensor_dict
+    return initial_offsets
 
 def getAllLocations(session):
     locations = []

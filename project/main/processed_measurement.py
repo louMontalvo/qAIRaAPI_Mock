@@ -11,9 +11,34 @@ from project.database.models import Qhawax, ProcessedMeasurement
 import project.main.utils as utils
 from sqlalchemy import or_
 
+@app.route('/api/processed_measurements/', methods=['GET', 'POST'])
+def storeProcessedData():
+    if request.method == 'GET':
+        qhawax_name = request.args.get('name')
+        interval_minutes = int(request.args.get('interval_minutes')) \
+            if request.args.get('interval_minutes') is not None else 60
+        final_timestamp = datetime.datetime.now(dateutil.tz.tzutc())
+        initial_timestamp = final_timestamp - datetime.timedelta(minutes=interval_minutes)
+        processed_measurements = utils.queryDBProcessed(db.session, qhawax_name, initial_timestamp, final_timestamp)
+
+        if processed_measurements is not None:
+            processed_measurements_list = [measurement._asdict() for measurement in processed_measurements]
+            return make_response(jsonify(processed_measurements_list), 200)
+
+        else:
+            return make_response(jsonify('Measurements not found'), 404)
+
+    if request.method == 'POST':
+        try:
+            data_json = request.get_json()
+            utils.storeProcessedDataInDB(db.session, data_json)
+            return make_response('OK', 200)
+        except Exception as e:
+            print(e)
+            return make_response('Invalid format. Exception="%s"' % (e), 400)
 
 @app.route('/api/dataProcessed/', methods=['POST'])
-def handleNewData():
+def handleProcessedData():
     try:
         data_json = request.get_json()
         product_id = data_json['ID']
