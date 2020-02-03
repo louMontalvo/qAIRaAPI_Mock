@@ -23,7 +23,6 @@ def handleTimestampInData(data):
 #$
 
 def checkFields(data):
-
     if(((data['lat'] < -90.0) and (data['lat'] > 90.0)) and ((data['lon'] < -180.0) or (data['lon'] > 180.0))):
         return False
 
@@ -125,11 +124,10 @@ def storeRawDataInDB(session, data):
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
-
-    if(checkFields(data)):
-        processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
-        session.add(processed_measurement)
-        session.commit()
+    #if(checkFields(data)):
+    processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
+    session.add(processed_measurement)
+    session.commit()
 
 #$ esto es del script
 def storeAirQualityDataInDB(session, data):
