@@ -4,11 +4,13 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
+from flask_cors import CORS, cross_origin
 
 # Config
 app = Flask(__name__)
 app.config.from_object('config')
-socketio = SocketIO(app)
+socketio = SocketIO(app,cors_allowed_origins="*")
+CORS(app)
 
 # Extensions
 db = SQLAlchemy(app)
