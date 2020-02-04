@@ -96,3 +96,53 @@ def updateIncaData():
 def requestAllLocations():
     locations = utils.getAllLocations(db.session)
     return make_response(jsonify(locations), 200)
+
+@app.route('/api/qhawax_active/', methods=['GET'])
+def getQhawaxLatestTimestamp():
+    qhawax_name = request.args.get('qhawax_name')
+    return utils.getQhawaxLatestTimestamp(db.session, qhawax_name)
+
+@app.route('/api/qhawax_critical_timestamp_alert/', methods=['POST'])
+def sendQhawaxTimestamp():
+    req_json = request.get_json(cache=False)
+    try:
+        qhawax_name = str(req_json['qhawax_name']).strip()
+        secret_key_hashed = str(req_json['secret_key']).strip()
+    except KeyError as e:
+        return utils.makeMissingParameterResponse(e.message)
+
+    qhawax = utils.getQhawaxLatestCoordinatesFromName(db.session, qhawax_name)
+    timestamp = utils.getQhawaxLatestTimestamp(db.session, qhawax_name)
+    if (timestamp!=None):
+        if qhawax is not None and bcrypt.verify(app.config['SECRET_KEY'], secret_key_hashed):
+            subject = 'Qhawax %s no se encuentra activo' % (qhawax_name)
+            content = 'Ultima vez que se mostró activo: %s' % (timestamp)
+            sendEmail(to=app.config['MAIL_DEFAULT_RECEIVER'], subject=subject, template=content)
+            json_message = jsonify({'OK': 'Email sent for active qhawax: %s' % (qhawax_name)})
+            return make_response(json_message, RESPONSE_CODES['OK'])
+        else:
+            json_message = jsonify({'error': 'Qhawax not found with name: %s' % (qhawax_name)})
+            return make_response(json_message, RESPONSE_CODES['NOT_FOUND'])
+
+
+@app.route('/api/qhawax_change_status_off/', methods=['POST'])
+def sendQhawaxStatusOff():
+    req_json = request.get_json()
+    qhawax_id = str(req_json['qhawax_name']).strip()    
+    utils.saveStatusOff(db.session, qhawax_id)
+    return make_response('Success', 200)
+
+@app.route('/api/qhawax_status/', methods=['GET'])
+def getQhawaxStatus():
+    req_json = request.get_json()
+    qhawax_id = str(req_json['qhawax_name']).strip()    
+    return utils.getQhawaxStatus(db.session, qhawax_id)
+
+@app.route('/api/qhawax_change_status_on/', methods=['POST'])
+def sendQhawaxStatusOn():
+    req_json = request.get_json()
+    qhawax_id = str(req_json['qhawax_name']).strip()    
+    utils.saveStatusOn(db.session, qhawax_id)
+    return make_response('Success', 200)
+
+

@@ -17,7 +17,9 @@ def storeProcessedData():
         qhawax_name = request.args.get('name')
         interval_minutes = int(request.args.get('interval_minutes')) \
             if request.args.get('interval_minutes') is not None else 60
+        print(interval_minutes)
         final_timestamp = datetime.datetime.now(dateutil.tz.tzutc())
+        print(final_timestamp)
         initial_timestamp = final_timestamp - datetime.timedelta(minutes=interval_minutes)
         processed_measurements = utils.queryDBProcessed(db.session, qhawax_name, initial_timestamp, final_timestamp)
 

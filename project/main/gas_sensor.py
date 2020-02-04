@@ -68,3 +68,13 @@ def saveNonControlledOffsets():
     utils.saveNonControlledOffsetsFromProductID(db.session, qhawax_id, non_controlled_offsets)
     return make_response('Success', 200)
 
+@app.route('/api/measurementPromedio/', methods=['GET'])
+def requestProm():
+    name = request.args.get('name')
+    sensor = request.args.get('sensor')
+    hoursSensor = request.args.get('hoursSensor')
+    final_timestamp = datetime.datetime.now() + datetime.timedelta(hours=5)
+    initial_timestamp = final_timestamp - datetime.timedelta(hours=int(hoursSensor)) - datetime.timedelta(hours=1)
+    qhawax_measurement_sensor = utils.queryDBPROM(db.session, name, sensor, initial_timestamp, final_timestamp)
+    return str(qhawax_measurement_sensor)
+

@@ -346,6 +346,18 @@ def getAllLocations(session):
 
     return locations
 
+def getQhawaxStatus(session, qhawax_id):
+    state = session.query(Qhawax.state).filter_by(name=qhawax_id).one()[0]
+    return state
+
+def saveStatusOff(session, qhawax_id):
+    session.query(Qhawax).filter_by(name=qhawax_id).update(values={'state': "OFF"})
+    session.commit()
+
+def saveStatusOn(session, qhawax_id):
+    session.query(Qhawax).filter_by(name=qhawax_id).update(values={'state': "ON"})
+    session.commit()
+
 def saveLocationFromProductID(session, qhawax_id, lat, lon):
     new_location = Location(lat=lat, lon=lon)
     session.query(Qhawax).filter_by(name=qhawax_id).update(values={'_location': new_location.serialize})
@@ -463,3 +475,12 @@ def queryIncaQhawax(session, name):
     else:
         resultado = 'green'
     return resultado
+
+def getQhawaxLatestTimestamp(session, qhawax_name):
+    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).one().id
+    qhawax_time = session.query(RawMeasurement.timestamp).filter_by(qhawax_id=qhawax_id).first()
+    raw_measurement_timestamp=""
+    if(qhawax_time!=None):
+        raw_measurement_timestamp = session.query(RawMeasurement.timestamp).filter_by(qhawax_id=qhawax_id) \
+            .order_by(RawMeasurement.id.desc()).first().timestamp
+    return str(raw_measurement_timestamp)

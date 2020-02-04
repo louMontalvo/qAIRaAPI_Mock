@@ -3,7 +3,8 @@ import requests
 import datetime
 import sys
 
-BASE_URL = 'http://54.159.70.183/'
+#BASE_URL = 'http://54.159.70.183/'
+BASE_URL = 'http://127.0.0.1:8887/'
 ACTIVE_QHAWAX_ENDPOINT = 'api/get_active_qhawax/'
 OFFSETS_ENDPOINT = 'api/request_offsets/'
 CONTROLLED_OFFSETS_ENDPOINT = 'api/request_controlled_offsets/'
@@ -168,7 +169,6 @@ for qhawax_name in qhawax_names:
     processed_measurement = processRawMeasurement(average_raw_measurement, sensor_offsets, 
                                             controlled_offsets, non_controlled_offsets)
     processed_measurement['ID'] = qhawax_name
-    print(processed_measurement)
     # Store processed data in db
     response = requests.post(BASE_URL + PROCESSED_DATA_ENDPOINT, json=processed_measurement)
     print(response.text)

@@ -19,7 +19,9 @@ def storeAirQualityData():
         interval_hours = int(request.args.get('interval_hours')) \
             if request.args.get('interval_hours') is not None else 1
         final_timestamp = datetime.datetime.now(dateutil.tz.tzutc())
+        print(final_timestamp)
         initial_timestamp = final_timestamp - datetime.timedelta(hours=interval_hours)
+        print(initial_timestamp)
         air_quality_measurements = utils.queryDBAirQuality(db.session, qhawax_name, initial_timestamp, final_timestamp)
 
         if air_quality_measurements is not None:
