@@ -4,8 +4,8 @@ import datetime
 import sys
 
 #BASE_URL = 'http://54.159.70.183/'
-BASE_URL = 'http://127.0.0.1:8887/'
-ACTIVE_QHAWAX_ENDPOINT = 'api/get_active_qhawax/'
+BASE_URL = 'http://127.0.0.1:8888/'
+ACTIVE_QHAWAX_ENDPOINT = 'api/get_all_active_qhawax/'
 OFFSETS_ENDPOINT = 'api/request_offsets/'
 CONTROLLED_OFFSETS_ENDPOINT = 'api/request_controlled_offsets/'
 NON_CONTROLLED_OFFSETS_ENDPOINT = 'api/request_non_controlled_offsets/'

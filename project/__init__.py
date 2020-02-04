@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_jsglue import JSGlue
 from flask_login import LoginManager
+from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
@@ -18,6 +19,7 @@ jsglue = JSGlue(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 migrate = Migrate(app, db)
+mail = Mail(app)
 
 from project.main import gas_sensor, processed_measurement, qhawax, air_quality, raw_measurement
 import project.database.models as models

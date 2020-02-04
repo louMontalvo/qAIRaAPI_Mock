@@ -5,10 +5,10 @@ from passlib.hash import bcrypt
 
 
 #BASE_URL = 'http://54.159.70.183/'
-BASE_URL = 'http://127.0.0.1:8887/'
+BASE_URL = 'http://127.0.0.1:8888/'
 MAININCA_DATA_ENDPOINT = 'api/save_main_inca/'
 GET_MEASUREMENT_PROM = 'api/measurementPromedio/'
-ACTIVE_QHAWAX_ENDPOINT = 'api/get_active_qhawax/'
+ACTIVE_QHAWAX_ENDPOINT = 'api/get_all_active_qhawax/'
 
 def validaCO_NO2(val):
     calificacionInca = 0

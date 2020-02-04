@@ -484,3 +484,6 @@ def getQhawaxLatestTimestamp(session, qhawax_name):
         raw_measurement_timestamp = session.query(RawMeasurement.timestamp).filter_by(qhawax_id=qhawax_id) \
             .order_by(RawMeasurement.id.desc()).first().timestamp
     return str(raw_measurement_timestamp)
+
+def getQhawaxLatestCoordinatesFromName(session, qhawax_name):
+    return session.query(Qhawax._location).filter_by(name=qhawax_name).first()

@@ -3,7 +3,7 @@ import datetime
 
 #BASE_URL = 'http://54.159.70.183/'
 BASE_URL = 'http://127.0.0.1:8888/'
-ACTIVE_QHAWAX_ENDPOINT = 'api/get_active_qhawax/'
+ACTIVE_QHAWAX_ENDPOINT = 'api/get_all_active_qhawax/'
 PROCESSED_DATA_ENDPOINT = 'api/processed_measurements/'
 AIR_QUALITY_DATA_ENDPOINT = 'api/air_quality_measurements/'
 
