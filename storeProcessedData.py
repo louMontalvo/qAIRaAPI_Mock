@@ -42,27 +42,37 @@ TEMPERATURE_CORRECTIONS = {
 MIN_TEMPERATURE = -30
 MAX_TEMPERATURE = 50
 
-def averageRawMeasurements(raw_measurements):
+def averageProcessedMeasurements(processed_measurements):
     SKIP_KEYS = ['timestamp']
-    
-    average_raw_measurement = {}
-    for sensor_name in raw_measurements[0]:
+    average_processed_measurement = {}
+    for sensor_name in processed_measurements[0]:
         if sensor_name in SKIP_KEYS:
             continue
-        
-        sensor_values = [measurement[sensor_name] for measurement in raw_measurements]
+        sensor_values = [measurement[sensor_name] for measurement in processed_measurements]
         if all([value is None for value in sensor_values]):
-            average_raw_measurement[sensor_name] = None 
+            average_processed_measurement[sensor_name] = None 
         else:
             sensor_values_without_none = [value for value in sensor_values if value is not None]
             if(len(sensor_values_without_none)>0):
-                average_raw_measurement[sensor_name] = sum(sensor_values_without_none)/len(sensor_values_without_none)
+                average_processed_measurement[sensor_name] = sum(sensor_values_without_none)/len(sensor_values_without_none)
     
-    average_raw_measurement['timestamp'] = raw_measurements[-1]['timestamp']
+    average_processed_measurement['timestamp'] = processed_measurements[-1]['timestamp']
 
-    return average_raw_measurement
+    return average_processed_measurement
 
-def processRawMeasurement(raw_measurement, sensor_offsets, controlled_offsets, non_controlled_offsets):
+def sortSensors(op1_op2_measurements):
+    #print(sorted(op1_op2_measurements.keys()))
+    sort_dict={}
+    o3_value = op1_op2_measurements['O3']
+    del op1_op2_measurements['O3']
+    for i in sorted(op1_op2_measurements.keys()):
+        sort_dict[i]=op1_op2_measurements[i]
+    op1_op2_measurements['O3']=o3_value
+    return op1_op2_measurements
+
+
+
+def processRawMeasurement(raw_measurement, sensor_offsets, controlled_offsets, non_controlled_offsets,CNO2):
     SKIP_KEYS = ['timestamp', 'lat', 'lon', 'alt']
     measurement = {key:value for key, value in raw_measurement.items() if value is not None}
     
@@ -81,6 +91,8 @@ def processRawMeasurement(raw_measurement, sensor_offsets, controlled_offsets, n
                 op1_op2_measurements[sensor_name] = {}
             op1_op2_measurements[sensor_name][sensor_channel] = measurement[sensor_full_name]
 
+    op1_op2_measurements = sortSensors(op1_op2_measurements)
+
     for sensor_name in op1_op2_measurements:
         op1_op2_measurement = {
             'name': sensor_name,
@@ -88,17 +100,18 @@ def processRawMeasurement(raw_measurement, sensor_offsets, controlled_offsets, n
             'OP2': op1_op2_measurements[sensor_name]['OP2'],
             'temperature': measurement['temperature']
         }
-
-        processed_sensor = processSensorChannels(op1_op2_measurement, sensor_offsets[sensor_name])
+        processed_sensor = processSensorChannels(op1_op2_measurement, sensor_offsets[sensor_name],CNO2)
+        if(sensor_name == 'NO2'):
+            CNO2 = processed_sensor*sensor_offsets[sensor_name]['sensitivity']
         processed_sensor = applyControlledCorrection(processed_sensor, controlled_offsets[sensor_name])
         processed_sensor = applyNonControlledCorrection(processed_sensor, non_controlled_offsets[sensor_name])
         processed_measurement[sensor_name] = round(processed_sensor, 3)
 
     return processed_measurement
 
-def processSensorChannels(op1_op2_measurement, sensor_offsets):
+def processSensorChannels(op1_op2_measurement, sensor_offsets,CNO2):
     temperature_correction = computeTemperatureCorrection(op1_op2_measurement['name'], op1_op2_measurement['temperature'])
-    OP1_difference = op1_op2_measurement['OP1'] - sensor_offsets['WE']
+    OP1_difference = op1_op2_measurement['OP1'] - sensor_offsets['WE'] - CNO2*sensor_offsets['sensitivity_2']
     OP2_difference = op1_op2_measurement['OP2'] - sensor_offsets['AE']
     result=0
     if(sensor_offsets['sensitivity']>0):
@@ -139,7 +152,6 @@ response = requests.get(BASE_URL + ACTIVE_QHAWAX_ENDPOINT)
 qhawax_names = [qhawax['name'] for qhawax in response.json()]
 for qhawax_name in qhawax_names:
     print('Processing %s...' % (qhawax_name))
-
     # Request last minute data
     params = {'name': qhawax_name, 'interval_minutes': '1'}
     response = requests.get(BASE_URL + RAW_DATA_ENDPOINT, params=params)
@@ -148,14 +160,10 @@ for qhawax_name in qhawax_names:
     if len(raw_measurements) == 0:
         continue
 
-    # Average measurements
-    average_raw_measurement = averageRawMeasurements(raw_measurements)
-    
     # Request offsets
     params = {'ID': qhawax_name}
     response = requests.get(BASE_URL + OFFSETS_ENDPOINT, params=params)
     sensor_offsets = response.json()
-
     # Request controlled offsets
     params = {'ID': qhawax_name}
     response = requests.get(BASE_URL + CONTROLLED_OFFSETS_ENDPOINT, params=params)
@@ -164,11 +172,17 @@ for qhawax_name in qhawax_names:
     params = {'ID': qhawax_name}
     response = requests.get(BASE_URL + NON_CONTROLLED_OFFSETS_ENDPOINT, params=params)
     non_controlled_offsets = response.json()
-
-    # Convert raw data to processed data
-    processed_measurement = processRawMeasurement(average_raw_measurement, sensor_offsets, 
-                                            controlled_offsets, non_controlled_offsets)
-    processed_measurement['ID'] = qhawax_name
+    processed_array=[]
+    for measurement in raw_measurements:
+        CNO2=0
+        # Convert raw data to processed data
+        processed_measurement = processRawMeasurement(measurement, sensor_offsets, controlled_offsets, non_controlled_offsets,CNO2)
+        processed_array.append(processed_measurement)
+    
+    #Average measurements
+    average_processed_measurement = averageProcessedMeasurements(processed_array)
+    average_processed_measurement['ID'] = qhawax_name
+    #print(average_processed_measurement)
     # Store processed data in db
     response = requests.post(BASE_URL + PROCESSED_DATA_ENDPOINT, json=processed_measurement)
     print(response.text)

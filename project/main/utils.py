@@ -365,7 +365,6 @@ def saveLocationFromProductID(session, qhawax_id, lat, lon):
 
 def saveOffsetsFromProductID(session, qhawax_id, offsets):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_id).one()[0]
-    print(qhawax_id)
     for sensor_type in offsets:
         session.query(GasSensor).filter_by(qhawax_id=qhawax_id, type=sensor_type).update(values=offsets[sensor_type])
 
@@ -445,6 +444,9 @@ def queryDBPROM(session, qhawax_name, sensor, initial_timestamp, final_timestamp
     elif sensor == 'O3':
         datos = AirQualityMeasurement.O3
         hoursPerSensor = 8
+    elif sensor == 'H2S':
+        datos = AirQualityMeasurement.H2S
+        hoursPerSensor = 24
 
     resultado=[]
     resultado = session.query(datos).filter(AirQualityMeasurement.qhawax_id == qhawax_id). \
@@ -460,17 +462,17 @@ def queryDBPROM(session, qhawax_name, sensor, initial_timestamp, final_timestamp
             sum = sum + resultado[i][0]
         promf = sum /len(resultado)
         
-        return promf
+    return promf
 
 def queryIncaQhawax(session, name):
     qhawax_inca = session.query(Qhawax.main_inca).filter_by(name=name).one()
-    if qhawax_inca == 50:
+    if qhawax_inca[0] == 50:
         resultado = 'green'
-    elif qhawax_inca == 100:
+    elif qhawax_inca[0] == 100:
         resultado = 'yellow'
-    elif qhawax_inca == 500:
+    elif qhawax_inca[0] == 500:
         resultado = 'orange'
-    elif qhawax_inca == 600:
+    elif qhawax_inca[0] == 600:
         resultado = 'red'
     else:
         resultado = 'green'

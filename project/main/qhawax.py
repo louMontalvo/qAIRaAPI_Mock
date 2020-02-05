@@ -10,6 +10,7 @@ from project import app, db, socketio
 from project.database.models import Qhawax
 import project.main.utils as utils
 from sqlalchemy import or_
+from flask_socketio import join_room
 
 from passlib.hash import bcrypt
 from project.main.email import sendEmail
@@ -86,10 +87,16 @@ def saveLocation():
 @app.route('/api/save_main_inca/', methods=['POST'])
 def updateIncaData():
     req_json = request.get_json()
+    jsonsend={}
     try:
         name = str(req_json['name']).strip()
         data_json = req_json['value_inca']
         utils.updateMainIncaInDB(db.session, data_json, name)
+        jsonsend['name'] = name
+        jsonsend['value_inca'] =req_json['value_inca']
+        socketio.emit('update_inca_event', jsonsend, room=name)
+        socketio.emit('update_inca_summary', jsonsend)
+
         return make_response('OK', 200)
     except Exception as e:
         print(e)
