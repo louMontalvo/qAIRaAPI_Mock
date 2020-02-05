@@ -54,8 +54,8 @@ def averageProcessedMeasurements(processed_measurements):
         else:
             sensor_values_without_none = [value for value in sensor_values if value is not None]
             if(len(sensor_values_without_none)>0):
-                average_processed_measurement[sensor_name] = sum(sensor_values_without_none)/len(sensor_values_without_none)
-    
+                average_processed_measurement[sensor_name] = round(sum(sensor_values_without_none)/len(sensor_values_without_none), 3)
+        
     average_processed_measurement['timestamp'] = processed_measurements[-1]['timestamp']
 
     return average_processed_measurement
@@ -182,7 +182,7 @@ for qhawax_name in qhawax_names:
     #Average measurements
     average_processed_measurement = averageProcessedMeasurements(processed_array)
     average_processed_measurement['ID'] = qhawax_name
-    #print(average_processed_measurement)
+    print(average_processed_measurement)
     # Store processed data in db
-    response = requests.post(BASE_URL + PROCESSED_DATA_ENDPOINT, json=processed_measurement)
+    response = requests.post(BASE_URL + PROCESSED_DATA_ENDPOINT, json=average_processed_measurement)
     print(response.text)
