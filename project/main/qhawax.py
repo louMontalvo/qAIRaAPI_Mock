@@ -104,7 +104,6 @@ def getAllQhawax():
 
 @app.route('/api/get_all_active_qhawax/', methods=['GET'])
 def getActiveQhawax():
-    print(getActiveQhawax)
     all_active_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca,Qhawax.qhawax_type, Qhawax.eca_noise_id).order_by(Qhawax.name).filter((Qhawax.state == 'ON')).all()
     qhawax_list = [
         {'name': qhawax.name, 
@@ -156,7 +155,7 @@ def requestAllLocations():
 @app.route('/api/get_time_active_qhawax/', methods=['GET'])
 def getQhawaxLatestTimestamp():
     qhawax_name = request.args.get('qhawax_name')
-    return str(utils.getQhawaxLatestTimestamp(db.session, qhawax_name))
+    return utils.getQhawaxLatestTimestamp(db.session, qhawax_name)
 
 @app.route('/api/qhawax_critical_timestamp_alert/', methods=['POST'])
 def sendQhawaxTimestamp():
