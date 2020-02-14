@@ -77,9 +77,10 @@ class Qhawax(db.Model):
     name = db.Column(db.String(300), nullable=False, unique=True)
     main_aqi = db.Column(db.Float)
     main_inca = db.Column(db.Float)
-    type = db.Column(db.String(100), nullable=False, unique=True)
-    state = db.Column(db.String(5), nullable=False, unique=True)
     _location = db.Column(NestedMutableJson) # Location object
+    qhawax_type = db.Column(db.String(100), nullable=False, unique=True)
+    state = db.Column(db.String(5), nullable=False, unique=True)
+    eca_noise_id = db.Column(db.Integer, db.ForeignKey('EcaNoise.id'))
     raw_measurements = db.relationship('RawMeasurement', backref='qhawax', lazy='subquery',
                                         cascade='delete, delete-orphan')
     processed_measurements = db.relationship('ProcessedMeasurement', backref='qhawax', lazy='subquery',
@@ -87,13 +88,13 @@ class Qhawax(db.Model):
     air_quality_measurements = db.relationship('AirQualityMeasurement', backref='qhawax', lazy='subquery',
                                                 cascade='delete, delete-orphan')
     gas_sensors = db.relationship('GasSensor', backref='qhawax', lazy='subquery') # Don't delete gas sensor if qhawax is deleted
-
-    def __init__(self, company, name, location, type,state):
+    
+    def __init__(self, company, name, location, qhawax_type,state):
         utils.checkValidCompany(company)
         self.company = company
         self.name = name
         self.location = location
-        self.type = type
+        self.qhawax_type = qhawax_type
         self.state = state
 
     @property
@@ -108,12 +109,13 @@ class Qhawax(db.Model):
     @property
     def serialize(self):
         return {
-            'name' : self.name,
-        'location' : self.location,
-        'main_aqi' : self.main_aqi,
-       'main_inca' : self.main_inca,
-       'type'      : self.type,
-       'state'     : self.state }
+            'name'          : self.name,
+            'location'      : self.location,
+            'main_aqi'      : self.main_aqi,
+            'main_inca'     : self.main_inca,
+            'qhawax_type'   : self.qhawax_type,
+            'state'         : self.state,
+            'eca_noise_id'  : self.eca_noise_id }
 
 class GasSensor(db.Model):
     __tablename__ = 'gas_sensor'
@@ -132,7 +134,7 @@ class GasSensor(db.Model):
     C0 = db.Column(db.Float, nullable=False, default=0, server_default='0')
     NC1 = db.Column(db.Float, nullable=False, default=1, server_default='1')
     NC0 = db.Column(db.Float, nullable=False, default=0, server_default='0')
-    qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
+    qhawax_id = db.Column(db.Integer, db.ForeignKey('eca_noise.id'))
 
     @property
     def serialize(self):
@@ -290,5 +292,15 @@ class AirQualityMeasurement(db.Model):
     lon = db.Column(db.Float)
     alt = db.Column(db.Float)
     qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
+
+
+class EcaNoise(db.Model):
+    __tablename__ = 'eca_noise'
+
+    # Column's definition
+    id = db.Column(db.Integer, primary_key=True)
+    area_name = db.Column(db.String(100))
+    max_daytime_limit = db.Column(db.Integer)
+    max_night_limit = db.Column(db.Integer)
 
 import project.database.utils as utils

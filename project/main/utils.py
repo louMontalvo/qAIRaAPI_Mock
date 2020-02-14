@@ -3,7 +3,7 @@ import dateutil
 import dateutil.parser
 import time
 
-from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement
+from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise
 from project.database.utils import Location
 
 elapsed_time = None
@@ -485,7 +485,15 @@ def getQhawaxLatestTimestamp(session, qhawax_name):
     if(qhawax_time!=None):
         raw_measurement_timestamp = session.query(RawMeasurement.timestamp).filter_by(qhawax_id=qhawax_id) \
             .order_by(RawMeasurement.id.desc()).first().timestamp
-    return str(raw_measurement_timestamp)
+    return raw_measurement_timestamp
 
 def getQhawaxLatestCoordinatesFromName(session, qhawax_name):
     return session.query(Qhawax._location).filter_by(name=qhawax_name).first()
+
+
+def queryGetEcaNoise(session, eca_noise_id):
+    fields = (EcaNoise.id, EcaNoise.area_name, EcaNoise.max_daytime_limit, EcaNoise.max_night_limit)
+    return session.query(*fields).filter(EcaNoise.id == eca_noise_id).one()
+
+
+

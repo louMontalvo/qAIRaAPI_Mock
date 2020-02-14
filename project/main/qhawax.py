@@ -50,6 +50,48 @@ def getOneQhawaxMiraflores():
         'main_inca': qhawax.main_inca } for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
+@app.route('/api/get_qhawax_msb/', methods=['GET'])
+def getQhawaxSanBorja():
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id).filter(or_(Qhawax.company_id == 4)).all()
+    print(all_qhawax)
+    qhawax_list = [
+        {'name': qhawax.name, 
+        'location': qhawax._location,
+        'main_aqi': qhawax.main_aqi,
+        'main_inca': qhawax.main_inca,
+        'qhawax_type': qhawax.qhawax_type,
+        'state':qhawax.state,
+        'eca_noise_id': qhawax.eca_noise_id} for qhawax in all_qhawax]
+    return make_response(jsonify(qhawax_list), 200)
+
+@app.route('/api/get_qhawax_miraflores/', methods=['GET'])
+def getQhawaxMiraflores():
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id).filter(or_(Qhawax.company_id == 8)).all()
+    print(all_qhawax)
+    qhawax_list = [
+        {'name': qhawax.name, 
+        'location': qhawax._location,
+        'main_aqi': qhawax.main_aqi,
+        'main_inca': qhawax.main_inca,
+        'qhawax_type': qhawax.qhawax_type,
+        'state':qhawax.state,
+        'eca_noise_id': qhawax.eca_noise_id} for qhawax in all_qhawax]
+    return make_response(jsonify(qhawax_list), 200)
+
+@app.route('/api/get_qhawax_cercado/', methods=['GET'])
+def getQhawaxCercadoLima():
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id).filter(or_(Qhawax.company_id == 3)).all()
+    print(all_qhawax)
+    qhawax_list = [
+        {'name': qhawax.name, 
+        'location': qhawax._location,
+        'main_aqi': qhawax.main_aqi,
+        'main_inca': qhawax.main_inca,
+        'qhawax_type': qhawax.qhawax_type,
+        'state':qhawax.state,
+        'eca_noise_id': qhawax.eca_noise_id} for qhawax in all_qhawax]
+    return make_response(jsonify(qhawax_list), 200)
+
 @app.route('/api/get_all_qhawax/', methods=['GET'])
 def getAllQhawax():
     all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca).order_by(Qhawax.name).all()
@@ -124,10 +166,14 @@ def sendQhawaxTimestamp():
 
     qhawax = utils.getQhawaxLatestCoordinatesFromName(db.session, qhawax_name)
     timestamp = utils.getQhawaxLatestTimestamp(db.session, qhawax_name)
-    if (timestamp!=None):
+    print(timestamp)
+    lessfive = timestamp - datetime.timedelta(hours=5)
+    lessfive = str(lessfive)
+    print(lessfive)
+    if (lessfive!=None):
         if qhawax is not None and bcrypt.verify(app.config['SECRET_KEY'], secret_key_hashed):
             subject = 'Qhawax %s no se encuentra activo' % (qhawax_name)
-            content = 'Ultima vez que se mostró activo: %s' % (timestamp)
+            content = 'Ultima vez que se mostró activo: %s' % (lessfive)
             sendEmail(to=app.config['MAIL_DEFAULT_RECEIVER'], subject=subject, template=content)
             json_message = jsonify({'OK': 'Email sent for active qhawax: %s' % (qhawax_name)})
             return make_response(json_message, RESPONSE_CODES['OK'])
