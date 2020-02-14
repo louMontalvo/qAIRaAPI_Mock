@@ -43,8 +43,8 @@ def handleProcessedData():
         data_json = request.get_json()
         product_id = data_json['ID']
         utils.storeProcessedDataInDB(db.session, data_json)
-        socketio.emit('new_data_event', data_json, room=product_id)
-        socketio.emit('new_data_summary', data_json)
+        socketio.emit('new_data_event_processed', data_json, room=product_id)
+        socketio.emit('new_data_summary_processed', data_json)
         return make_response('OK', 200)
     except Exception as e:
         print(e)

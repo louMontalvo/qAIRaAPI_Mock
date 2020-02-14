@@ -80,7 +80,8 @@ class Qhawax(db.Model):
     _location = db.Column(NestedMutableJson) # Location object
     qhawax_type = db.Column(db.String(100), nullable=False, unique=True)
     state = db.Column(db.String(5), nullable=False, unique=True)
-    eca_noise_id = db.Column(db.Integer, db.ForeignKey('EcaNoise.id'))
+    eca_noise_id = db.Column(db.Integer, db.ForeignKey('eca_noise.id'))
+    
     raw_measurements = db.relationship('RawMeasurement', backref='qhawax', lazy='subquery',
                                         cascade='delete, delete-orphan')
     processed_measurements = db.relationship('ProcessedMeasurement', backref='qhawax', lazy='subquery',
@@ -89,13 +90,14 @@ class Qhawax(db.Model):
                                                 cascade='delete, delete-orphan')
     gas_sensors = db.relationship('GasSensor', backref='qhawax', lazy='subquery') # Don't delete gas sensor if qhawax is deleted
     
-    def __init__(self, company, name, location, qhawax_type,state):
+    def __init__(self, company, name, location, qhawax_type,state,eca_noise):
         utils.checkValidCompany(company)
         self.company = company
         self.name = name
         self.location = location
         self.qhawax_type = qhawax_type
         self.state = state
+        self.eca_noise = eca_noise
 
     @property
     def location(self):
@@ -134,7 +136,7 @@ class GasSensor(db.Model):
     C0 = db.Column(db.Float, nullable=False, default=0, server_default='0')
     NC1 = db.Column(db.Float, nullable=False, default=1, server_default='1')
     NC0 = db.Column(db.Float, nullable=False, default=0, server_default='0')
-    qhawax_id = db.Column(db.Integer, db.ForeignKey('eca_noise.id'))
+    qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
 
     @property
     def serialize(self):
@@ -294,6 +296,7 @@ class AirQualityMeasurement(db.Model):
     qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
 
 
+
 class EcaNoise(db.Model):
     __tablename__ = 'eca_noise'
 
@@ -302,5 +305,7 @@ class EcaNoise(db.Model):
     area_name = db.Column(db.String(100))
     max_daytime_limit = db.Column(db.Integer)
     max_night_limit = db.Column(db.Integer)
+    qhawaxes = db.relationship('Qhawax', backref='eca_noise', lazy='subquery',
+                             cascade='delete, delete-orphan') 
 
 import project.database.utils as utils
