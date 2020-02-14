@@ -110,14 +110,11 @@ def storeRawDataInDB(session, data):
         session.commit()
 
         data_storage = []
-        elapsed_time = time.time()
-    
+        elapsed_time = time.time()  
     qhawax_name = data.pop('ID', None)
-    print(qhawax_name)
     if qhawax_name not in qhawax_storage:
         qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()
         qhawax_storage[qhawax_name] = qhawax_id[0]
-    print(qhawax_storage)
     raw_measurement = RawMeasurement(**data, qhawax_id=qhawax_storage[qhawax_name])
     data_storage.append(raw_measurement)
 
@@ -482,7 +479,6 @@ def queryIncaQhawax(session, name):
 def getQhawaxLatestTimestamp(session, qhawax_name):
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).one().id
     qhawax_time = session.query(RawMeasurement.timestamp).filter_by(qhawax_id=qhawax_id).first()
-    print(qhawax_time)
     raw_measurement_timestamp=""
     if(qhawax_time!=None):
         raw_measurement_timestamp = session.query(RawMeasurement.timestamp).filter_by(qhawax_id=qhawax_id) \
