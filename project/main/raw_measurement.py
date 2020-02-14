@@ -17,7 +17,6 @@ def handleRawData():
         data_json = request.get_json()
         product_id = data_json['ID']
         data_json = utils.handleTimestampInData(data_json)
-        print(data_json)
         utils.storeRawDataInDB(db.session, data_json)
 
         data_json['timestamp'] = str(data_json['timestamp'])
