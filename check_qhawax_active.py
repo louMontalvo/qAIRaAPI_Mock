@@ -18,9 +18,9 @@ all_active_qhawax_response=requests.get(GET_QHAWAX_ACTIVE)
 json_data = json.loads(all_active_qhawax_response.text)
 for qhawax in json_data:
 	response_time = requests.get(GET_QHAWAX_TIMESTAMP_URL, params={'qhawax_name': qhawax['name']})
-	lessfive = str(dateutil.parser.parse(str(response_time.text)) - datetime.timedelta(hours=5))
-	if(lessfive!=""):
-		qhawax_lost_timestamp = dateutil.parser.parse(lessfive)
+	if(response_time.text!=""):
+		qhawax_lost_timestamp = dateutil.parser.parse(response_time.text) - datetime.timedelta(hours=5)
+		print(qhawax_lost_timestamp)
 		if isQhawaxLostActivity(qhawax_lost_timestamp, datetime.datetime.now()):
 			response = requests.post(CRITICAL_TELEMETRY_ALERT_URL, json={'qhawax_name' : qhawax['name'],'secret_key' : bcrypt.hash(SECRET_KEY)})
 	else:

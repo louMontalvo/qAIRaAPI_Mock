@@ -155,7 +155,7 @@ def requestAllLocations():
 @app.route('/api/get_time_active_qhawax/', methods=['GET'])
 def getQhawaxLatestTimestamp():
     qhawax_name = request.args.get('qhawax_name')
-    return utils.getQhawaxLatestTimestamp(db.session, qhawax_name)
+    return str(utils.getQhawaxLatestTimestamp(db.session, qhawax_name))
 
 @app.route('/api/qhawax_critical_timestamp_alert/', methods=['POST'])
 def sendQhawaxTimestamp():
