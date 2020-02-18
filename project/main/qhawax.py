@@ -157,6 +157,11 @@ def getQhawaxLatestTimestamp():
     qhawax_name = request.args.get('qhawax_name')
     return str(utils.getQhawaxLatestTimestamp(db.session, qhawax_name))
 
+@app.route('/api/get_time_processed_data_active_qhawax/', methods=['GET'])
+def getQhawaxProcessedLatestTimestamp():
+    qhawax_name = request.args.get('qhawax_name')
+    return str(utils.getQhawaxLatestTimestampProcessedMeasurement(db.session, qhawax_name))
+
 @app.route('/api/qhawax_critical_timestamp_alert/', methods=['POST'])
 def sendQhawaxTimestamp():
     req_json = request.get_json(cache=False)
@@ -168,6 +173,30 @@ def sendQhawaxTimestamp():
 
     qhawax = utils.getQhawaxLatestCoordinatesFromName(db.session, qhawax_name)
     timestamp = utils.getQhawaxLatestTimestamp(db.session, qhawax_name)
+    lessfive = timestamp - datetime.timedelta(hours=5)
+    lessfive = str(lessfive)
+    if (lessfive!=None):
+        if qhawax is not None and bcrypt.verify(app.config['SECRET_KEY'], secret_key_hashed):
+            subject = 'Qhawax %s no se encuentra activo' % (qhawax_name)
+            content = 'Ultima vez que se mostró activo: %s' % (lessfive)
+            sendEmail(to=app.config['MAIL_DEFAULT_RECEIVER'], subject=subject, template=content)
+            json_message = jsonify({'OK': 'Email sent for active qhawax: %s' % (qhawax_name)})
+            return make_response(json_message, RESPONSE_CODES['OK'])
+        else:
+            json_message = jsonify({'error': 'Qhawax not found with name: %s' % (qhawax_name)})
+            return make_response(json_message, RESPONSE_CODES['NOT_FOUND'])
+
+@app.route('/api/qhawax_critical_processed_data_timestamp_alert/', methods=['POST'])
+def sendQhawaxProcessedDataTimestamp():
+    req_json = request.get_json(cache=False)
+    try:
+        qhawax_name = str(req_json['qhawax_name']).strip()
+        secret_key_hashed = str(req_json['secret_key']).strip()
+    except KeyError as e:
+        return utils.makeMissingParameterResponse(e.message)
+
+    qhawax = utils.getQhawaxLatestCoordinatesFromName(db.session, qhawax_name)
+    timestamp = utils.getQhawaxLatestTimestampProcessedMeasurement(db.session, qhawax_name)
     lessfive = timestamp - datetime.timedelta(hours=5)
     lessfive = str(lessfive)
     if (lessfive!=None):
