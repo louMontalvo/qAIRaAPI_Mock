@@ -122,7 +122,9 @@ def storeRawDataInDB(session, data):
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
-    #if(checkFields(data)):
+    data['PM1'] = data['PM1']/3
+    data['PM25'] = data['PM25']/3
+    data['PM10'] = data['PM10']/3
     processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
     session.add(processed_measurement)
     session.commit()
