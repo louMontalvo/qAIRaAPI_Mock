@@ -46,11 +46,11 @@ def storeProcessedDataInDB(session, data):
     data['PM1'] = data['PM1']/3
     data['PM25'] = data['PM25']/3
     data['PM10'] = data['PM10']/3
-    if(qhawax_id==7 or qhawax_id==8):
-        data['spl'] = (data['spl']-10)*10
+    #if(qhawax_id==7 or qhawax_id==8):
+    #    data['spl'] = (data['spl']-10)*10
     processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
-    #session.add(processed_measurement)
-    #session.commit()
+    session.add(processed_measurement)
+    session.commit()
 
 #$ esto es del script
 def storeAirQualityDataInDB(session, data):
