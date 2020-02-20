@@ -295,38 +295,7 @@ class GasInca(db.Model):
     PM25 = db.Column(db.Float)
     PM10 = db.Column(db.Float)
     SO2 = db.Column(db.Float)
-    VOC = db.Column(db.Float)
-    UV = db.Column(db.Float)
-    UVA = db.Column(db.Float)
-    UVB = db.Column(db.Float)
-    spl = db.Column(db.Float)
-    humidity = db.Column(db.Float)
-    pressure = db.Column(db.Float)
-    temperature = db.Column(db.Float)
     qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
-
-    @property
-    def serialize(self):
-        return {
-            'timestamp': str(self.timestamp),
-            'CO': self.CO,
-            'CO2': self.CO2,
-            'H2S': self.H2S,
-            'NO': self.NO,
-            'NO2': self.NO2,
-            'O3': self.O3,
-            'PM1': self.PM1,
-            'PM25': self.PM25,
-            'PM10': self.PM10,
-            'SO2': self.SO2,
-            'VOC': self.VOC,
-            'UV': self.UV,
-            'UVA': self.UVA,
-            'UVB': self.UVB,
-            'spl': self.spl,
-            'humidity': self.humidity,
-            'pressure': self.pressure,
-            'temperature': self.temperature}
 
 
 class AirQualityMeasurement(db.Model):

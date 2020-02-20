@@ -3,7 +3,7 @@ import dateutil
 import dateutil.parser
 import time
 
-from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise
+from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise, GasInca
 from project.database.utils import Location
 
 elapsed_time = None
@@ -46,10 +46,21 @@ def storeProcessedDataInDB(session, data):
     data['PM1'] = data['PM1']/3
     data['PM25'] = data['PM25']/3
     data['PM10'] = data['PM10']/3
-    #if(qhawax_id==7 or qhawax_id==8):
-    #    data['spl'] = (data['spl']-10)*10
+    if(qhawax_id==7 or qhawax_id==8):
+       data['spl'] = (data['spl']-10)*10
     processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
     session.add(processed_measurement)
+    session.commit()
+
+def storeGasIncaInDB(session, data):
+    qhawax_name = data.pop('ID', None)
+    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
+    
+    gas_inca_data = {'CO': data['CO'], 'H2S': data['H2S'], 'SO2': data['SO2'], 'NO2': data['NO2'],
+                        'O3': data['O3'], 'PM25': data['PM25'], 'PM10': data['PM10'],'timestamp': data['timestamp']}
+
+    gas_inca_processed = GasInca(**gas_inca_data, qhawax_id=qhawax_id)
+    session.add(gas_inca_processed)
     session.commit()
 
 #$ esto es del script
@@ -384,6 +395,8 @@ def queryDBPROM(session, qhawax_name, sensor, initial_timestamp, final_timestamp
         for i in range(len(resultado)):
             sum = sum + resultado[i][0]
         promf = sum /len(resultado)
+
+    #print('Imprimiendo promf', promf)
         
     return promf
 

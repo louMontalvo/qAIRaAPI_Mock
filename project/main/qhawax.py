@@ -197,8 +197,8 @@ def sendQhawaxProcessedDataTimestamp():
 
     qhawax = utils.getQhawaxLatestCoordinatesFromName(db.session, qhawax_name)
     timestamp = utils.getQhawaxLatestTimestampProcessedMeasurement(db.session, qhawax_name)
-    lessfive = timestamp - datetime.timedelta(hours=5)
-    lessfive = str(lessfive)
+    lessfive = str(timestamp)
+    print(lessfive)
     if (lessfive!=None):
         if qhawax is not None and bcrypt.verify(app.config['SECRET_KEY'], secret_key_hashed):
             subject = 'Qhawax %s no se encuentra activo' % (qhawax_name)

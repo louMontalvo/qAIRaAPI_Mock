@@ -1,5 +1,7 @@
 import requests
 import datetime
+import dateutil.parser
+import dateutil.tz
 
 #BASE_URL = 'http://54.159.70.183/'
 BASE_URL = 'http://127.0.0.1:8888/'
@@ -26,9 +28,8 @@ def averageProcessedMeasurements(processed_measurements):
             else:
                 average_processed_measurement[sensor_name] = averaged_value
     
-    starting_hour = datetime.datetime.now() - datetime.timedelta(hours=1)
+    starting_hour = datetime.datetime.now() - datetime.timedelta(hours=1) - datetime.timedelta(hours=5)
     average_processed_measurement['timestamp'] = str(starting_hour.replace(minute=0, second=0, microsecond=0))
-
     return average_processed_measurement
 
 # Request all qhawax
@@ -42,10 +43,13 @@ for qhawax_name in qhawax_names:
     processed_measurements = response.json()
     if len(processed_measurements) == 0:
         continue
-    # Average measurements
+    # Average measurementss
+    print(datetime.datetime.now())
+    print(datetime.datetime.now(dateutil.tz.tzutc()))
     average_processed_measurement = averageProcessedMeasurements(processed_measurements)
     average_processed_measurement['ID'] = qhawax_name
     # Store averaged processed data in db
+    #print(average_processed_measurement)
     response = requests.post(BASE_URL + AIR_QUALITY_DATA_ENDPOINT, json=average_processed_measurement)
     print(response.text)
 

@@ -18,7 +18,7 @@ def storeAirQualityData():
         qhawax_name = request.args.get('name')
         interval_hours = int(request.args.get('interval_hours')) \
             if request.args.get('interval_hours') is not None else 1
-        final_timestamp = datetime.datetime.now(dateutil.tz.tzutc())
+        final_timestamp = datetime.datetime.now(dateutil.tz.tzutc()) - datetime.timedelta(hours=5)
         print(final_timestamp)
         initial_timestamp = final_timestamp - datetime.timedelta(hours=interval_hours)
         print(initial_timestamp)

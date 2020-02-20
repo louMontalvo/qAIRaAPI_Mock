@@ -19,9 +19,10 @@ json_data = json.loads(all_active_qhawax_response.text)
 for qhawax in json_data:
 	response_time = requests.get(GET_QHAWAX_TIMESTAMP_URL, params={'qhawax_name': qhawax['name']})
 	if(response_time.text!=""):
-		qhawax_lost_timestamp = dateutil.parser.parse(response_time.text) - datetime.timedelta(hours=5)
+		qhawax_lost_timestamp = dateutil.parser.parse(response_time.text)
 		print(qhawax_lost_timestamp)
-		if isQhawaxLostActivity(qhawax_lost_timestamp, datetime.datetime.now()):
+		print(datetime.datetime.now()- datetime.timedelta(hours=6))
+		if isQhawaxLostActivity(qhawax_lost_timestamp, datetime.datetime.now()-datetime.timedelta(hours=6)):
 			response = requests.post(CRITICAL_TELEMETRY_ALERT_URL, json={'qhawax_name' : qhawax['name'],'secret_key' : bcrypt.hash(SECRET_KEY)})
 	else:
 		print("No hay registros en el qhawax: " + qhawax['name'])
