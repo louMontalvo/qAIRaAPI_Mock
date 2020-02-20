@@ -20,85 +20,6 @@ def handleTimestampInData(data):
     else:
         data['timestamp'] = dateutil.parser.parse(data['timestamp'])
     return data
-#$
-
-def checkFields(data):
-    if(((data['lat'] < -90.0) and (data['lat'] > 90.0)) and ((data['lon'] < -180.0) or (data['lon'] > 180.0))):
-        return False
-
-    if(data['CO']):
-        if(data['CO']<0):
-            return False
-
-    #if(data['CO2']):
-    #    if(data['CO2']<0):
-    #        return False
-
-    if(data['H2S']):
-        if(data['H2S']<0):
-            return False
-
-    #if(data['NO']):
-    #    if(data['NO']<0):
-    #        return False
-
-    if(data['NO2']):
-        if(data['NO2']<0):
-            return False
-
-    if(data['O3']):
-        if(data['O3']<0):
-            return False
-
-    if(data['PM1']):
-        if(data['PM1']<0):
-            return False
-
-    if(data['PM25']):
-        if(data['PM25']<0):
-            return False
-
-    if(data['PM10']):
-        if(data['PM10']<0):
-            return False
-
-    if(data['SO2']):
-        if(data['SO2']<0):
-            return False
-
-    #if(data['VOC']):
-    #    if(data['VOC']<0):
-    #        return False
-
-    #if(data['UV']):
-    #    if(data['UV']<0):
-    #        return False
-
-    #if(data['UVA']):
-    #    if(data['UVA']<0):
-    #        return False
-
-    #if(data['UVB']):
-    #    if(data['UVB']<0):
-    #        return False
-
-    #if(data['spl']):
-    #    if(data['spl']<0):
-    #        return False
-
-    if(data['humidity']):
-        if(data['humidity']<0):
-            return False
-
-    if(data['pressure']):
-        if(data['pressure']<0):
-            return False
-
-    if(data['temperature']):
-        if(data['temperature']<0):
-            return False
-   
-    return True
 
 def storeRawDataInDB(session, data):
     global elapsed_time, data_storage, qhawax_storage
@@ -125,9 +46,11 @@ def storeProcessedDataInDB(session, data):
     data['PM1'] = data['PM1']/3
     data['PM25'] = data['PM25']/3
     data['PM10'] = data['PM10']/3
+    if(qhawax_id==7 or qhawax_id==8):
+        data['spl'] = (data['spl']-10)*10
     processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
-    session.add(processed_measurement)
-    session.commit()
+    #session.add(processed_measurement)
+    #session.commit()
 
 #$ esto es del script
 def storeAirQualityDataInDB(session, data):

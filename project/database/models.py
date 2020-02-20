@@ -90,6 +90,9 @@ class Qhawax(db.Model):
                                                 cascade='delete, delete-orphan')
     gas_sensors = db.relationship('GasSensor', backref='qhawax', lazy='subquery') # Don't delete gas sensor if qhawax is deleted
     
+    gas_inca = db.relationship('GasInca', backref='qhawax', lazy='subquery',
+                                                cascade='delete, delete-orphan')
+
     def __init__(self, company, name, location, qhawax_type,state,eca_noise):
         utils.checkValidCompany(company)
         self.company = company
@@ -276,6 +279,55 @@ class ProcessedMeasurement(db.Model):
             'lon': self.lon,
             'alt': self.alt}
 
+class GasInca(db.Model):
+    __tablename__ = 'gas_inca'
+
+    # Column's definition
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    CO = db.Column(db.Float)
+    CO2 = db.Column(db.Float)
+    H2S = db.Column(db.Float)
+    NO = db.Column(db.Float)
+    NO2 = db.Column(db.Float)
+    O3 = db.Column(db.Float)
+    PM1 = db.Column(db.Float)
+    PM25 = db.Column(db.Float)
+    PM10 = db.Column(db.Float)
+    SO2 = db.Column(db.Float)
+    VOC = db.Column(db.Float)
+    UV = db.Column(db.Float)
+    UVA = db.Column(db.Float)
+    UVB = db.Column(db.Float)
+    spl = db.Column(db.Float)
+    humidity = db.Column(db.Float)
+    pressure = db.Column(db.Float)
+    temperature = db.Column(db.Float)
+    qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
+
+    @property
+    def serialize(self):
+        return {
+            'timestamp': str(self.timestamp),
+            'CO': self.CO,
+            'CO2': self.CO2,
+            'H2S': self.H2S,
+            'NO': self.NO,
+            'NO2': self.NO2,
+            'O3': self.O3,
+            'PM1': self.PM1,
+            'PM25': self.PM25,
+            'PM10': self.PM10,
+            'SO2': self.SO2,
+            'VOC': self.VOC,
+            'UV': self.UV,
+            'UVA': self.UVA,
+            'UVB': self.UVB,
+            'spl': self.spl,
+            'humidity': self.humidity,
+            'pressure': self.pressure,
+            'temperature': self.temperature}
+
 
 class AirQualityMeasurement(db.Model):
     __tablename__ = 'air_quality_measurement'
@@ -294,7 +346,6 @@ class AirQualityMeasurement(db.Model):
     lon = db.Column(db.Float)
     alt = db.Column(db.Float)
     qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
-
 
 
 class EcaNoise(db.Model):
