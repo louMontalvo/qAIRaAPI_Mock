@@ -21,3 +21,25 @@ def handleGasInca():
     except Exception as e:
         print(e)
         return make_response('Invalid format', 400)
+
+@app.route('/api/last_gas_inca_data/', methods=['GET'])
+def getLastGasIncaData():
+	final_timestamp_gases = datetime.datetime.now(dateutil.tz.tzutc()) - datetime.timedelta(hours=5)
+	initial_timestamp_gases = final_timestamp_gases - datetime.timedelta(hours=1)
+
+	gas_inca_last_data = utils.queryDBGasInca(db.session, initial_timestamp_gases, final_timestamp_gases)
+	print(gas_inca_last_data)
+
+	final_timestamp_otros = datetime.datetime.now(dateutil.tz.tzutc()) - datetime.timedelta(hours=5)
+	initial_timestamp_otros = final_timestamp_otros - datetime.timedelta(seconds=8)
+
+	otros_last_data = utils.queryDBOtrosNoGases(db.session, initial_timestamp_otros, final_timestamp_otros)
+	print(otros_last_data)
+
+	unique_list={}
+
+	#if gas_inca_last_data is not None:
+	#	gas_inca_last_data_list = [measurement._asdict() for measurement in gas_inca_last_data]
+	#	return make_response(jsonify(gas_inca_last_data_list), 200)
+	#else:
+	#	return make_response(jsonify('Gas Inca not found'), 404)

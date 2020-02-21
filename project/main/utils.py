@@ -158,6 +158,24 @@ def queryDBAirQuality(session, qhawax_name, initial_timestamp, final_timestamp):
                                     filter(AirQualityMeasurement.timestamp <= final_timestamp). \
                                     order_by(AirQualityMeasurement.timestamp).all()
 
+def queryDBOtrosNoGases(session,initial_timestamp, final_timestamp):
+
+    sensors = (ProcessedMeasurement.VOC, ProcessedMeasurement.UV,ProcessedMeasurement.UVA, 
+                ProcessedMeasurement.UVB, ProcessedMeasurement.spl, ProcessedMeasurement.humidity,
+                ProcessedMeasurement.pressure, ProcessedMeasurement.temperature, ProcessedMeasurement.lat,
+                ProcessedMeasurement.lon,ProcessedMeasurement.qhawax_id)
+
+    return session.query(*sensors).filter(ProcessedMeasurement.timestamp > initial_timestamp). \
+                                    filter(ProcessedMeasurement.timestamp < final_timestamp).all()
+
+
+def queryDBGasInca(session,initial_timestamp, final_timestamp):
+    sensors = (GasInca.CO, GasInca.H2S, GasInca.SO2, GasInca.NO2,GasInca.O3, 
+                GasInca.PM25, GasInca.PM10, GasInca.SO2,GasInca.timestamp, GasInca.qhawax_id)
+    
+    return session.query(*sensors).filter(GasInca.timestamp >= initial_timestamp). \
+                                    filter(GasInca.timestamp <= final_timestamp).all()
+
 def averageMeasurementsInHours(measurements, initial_timestamp, final_timestamp, interval_hours):
     initial_hour_utc = initial_timestamp.astimezone(tz=dateutil.tz.tzutc()).replace(tzinfo=None)
     final_hour_utc = final_timestamp.astimezone(tz=dateutil.tz.tzutc()).replace(tzinfo=None)
