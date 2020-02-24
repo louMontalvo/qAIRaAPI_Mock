@@ -32,13 +32,12 @@ def handleProcessedData():
     try:
         data_json = request.get_json()
         product_id = data_json['ID']
-        #utils.storeProcessedDataInDB(db.session, data_json)
+        utils.storeProcessedDataInDB(db.session, data_json)
         qhawax_zone = utils.getNoiseData(db.session,product_id)
 
         data_json['timestamp'] = str(data_json['timestamp'])
         data_json['ID'] = product_id
         data_json['zone'] = qhawax_zone
-        print(data_json)
 
         socketio.emit('new_data_event_processed', data_json, room=product_id)
         socketio.emit('new_data_summary_processed', data_json)

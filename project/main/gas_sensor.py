@@ -74,9 +74,7 @@ def requestProm():
     sensor = request.args.get('sensor')
     hoursSensor = request.args.get('hoursSensor')
     final_timestamp = datetime.datetime.now() - datetime.timedelta(hours=5)
-    #print(final_timestamp)
     initial_timestamp = final_timestamp - datetime.timedelta(hours=int(hoursSensor))
-    #print(initial_timestamp)
     qhawax_measurement_sensor = utils.queryDBPROM(db.session, name, sensor, initial_timestamp, final_timestamp)
     return str(qhawax_measurement_sensor)
 
