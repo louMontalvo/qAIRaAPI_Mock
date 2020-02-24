@@ -39,6 +39,11 @@ def storeRawDataInDB(session, data):
     raw_measurement = RawMeasurement(**data, qhawax_id=qhawax_storage[qhawax_name])
     data_storage.append(raw_measurement)
 
+def getNoiseData(session,qhawax_name):
+    eca_noise_id = session.query(Qhawax.eca_noise_id).filter_by(name=qhawax_name).first()
+    zone = session.query(EcaNoise.area_name).filter_by(id=eca_noise_id).first()[0]
+    return zone
+
 
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
