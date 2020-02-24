@@ -12,7 +12,7 @@ ACTIVE_QHAWAX_ENDPOINT = 'api/get_all_active_qhawax/'
 SAVE_GAS_INCA_ENDPOINT = 'api/saveGasInca/'
 
 
-def init_inca_gas_processed(valueH2S,valueCO,valueNO2,valuePM10,valuePM25,valueSO2, valueO3):
+def init_inca_gas_processed(valueH2S,valueCO,valueNO2,valuePM10,valuePM25,valueSO2, valueO3, calInca):
     inca_json = {}
     starting_hour = datetime.datetime.now() - datetime.timedelta(hours=5)
     inca_json['timestamp'] = str(starting_hour.replace(minute=0, second=0, microsecond=0))
@@ -26,6 +26,7 @@ def init_inca_gas_processed(valueH2S,valueCO,valueNO2,valuePM10,valuePM25,valueS
     inca_json['PM25'] = valuePM25
     inca_json['PM10'] = valuePM10
     inca_json['SO2'] = valueSO2
+    inca_json['main_inca'] = calInca
 
     return inca_json
     
@@ -133,7 +134,6 @@ response = requests.get(BASE_URL + ACTIVE_QHAWAX_ENDPOINT)
 qhawax_names = [qhawax['name'] for qhawax in response.json()]
 for qhawax_name in qhawax_names:
     try:
-        print(datetime.datetime.now())
         responseCO = requests.get(BASE_URL + GET_MEASUREMENT_PROM, params={'name': qhawax_name, 'sensor': 'CO', 'hoursSensor': 8})
         responseNO2 = requests.get(BASE_URL + GET_MEASUREMENT_PROM, params={'name': qhawax_name, 'sensor': 'NO2', 'hoursSensor': 1})
         responsePM10 = requests.get(BASE_URL + GET_MEASUREMENT_PROM, params={'name': qhawax_name, 'sensor': 'PM10', 'hoursSensor': 24})
@@ -150,11 +150,6 @@ for qhawax_name in qhawax_names:
         valueSO2 = math.floor(float(responseSO2.text) * factor_final_SO2)
         valueO3 = math.floor(float(responseO3.text) * factor_final_O3)
         
-        inca_gas_processed = init_inca_gas_processed(valueH2S,valueCO,valueNO2,valuePM10,valuePM25,valueSO2, valueO3)
-    
-        inca_gas_processed['ID'] = qhawax_name
-        response = requests.post(BASE_URL + SAVE_GAS_INCA_ENDPOINT, json=inca_gas_processed)
-
         aux = 0
         calInca = 0
         aux = validaH2S(valueH2S)
@@ -179,6 +174,12 @@ for qhawax_name in qhawax_names:
         if aux > calInca:
             calInca = aux 
         name_qhawax = qhawax_name
+
+        inca_gas_processed = init_inca_gas_processed(valueH2S,valueCO,valueNO2,valuePM10,valuePM25,valueSO2, valueO3,calInca)
+    
+        inca_gas_processed['ID'] = qhawax_name
+        response = requests.post(BASE_URL + SAVE_GAS_INCA_ENDPOINT, json=inca_gas_processed)
+
         response = requests.post(BASE_URL + MAININCA_DATA_ENDPOINT, json ={'name': name_qhawax, 'value_inca': calInca})
         
     except Exception as e:

@@ -61,9 +61,8 @@ def storeGasIncaInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
     
-    gas_inca_data = {'CO': data['CO'], 'H2S': data['H2S'], 'SO2': data['SO2'], 'NO2': data['NO2'],
-                        'O3': data['O3'], 'PM25': data['PM25'], 'PM10': data['PM10'],'timestamp': data['timestamp']}
-
+    gas_inca_data = {'CO': data['CO'], 'H2S': data['H2S'], 'SO2': data['SO2'], 'NO2': data['NO2'],'O3': data['O3'],
+             'PM25': data['PM25'], 'PM10': data['PM10'],'timestamp': data['timestamp'],'main_inca':data['main_inca']}
     gas_inca_processed = GasInca(**gas_inca_data, qhawax_id=qhawax_id)
     session.add(gas_inca_processed)
     session.commit()
@@ -163,20 +162,10 @@ def queryDBAirQuality(session, qhawax_name, initial_timestamp, final_timestamp):
                                     filter(AirQualityMeasurement.timestamp <= final_timestamp). \
                                     order_by(AirQualityMeasurement.timestamp).all()
 
-def queryDBOtrosNoGases(session,initial_timestamp, final_timestamp):
-
-    sensors = (ProcessedMeasurement.VOC, ProcessedMeasurement.UV,ProcessedMeasurement.UVA, 
-                ProcessedMeasurement.UVB, ProcessedMeasurement.spl, ProcessedMeasurement.humidity,
-                ProcessedMeasurement.pressure, ProcessedMeasurement.temperature, ProcessedMeasurement.lat,
-                ProcessedMeasurement.lon,ProcessedMeasurement.qhawax_id)
-
-    return session.query(*sensors).filter(ProcessedMeasurement.timestamp > initial_timestamp). \
-                                    filter(ProcessedMeasurement.timestamp < final_timestamp).all()
-
 
 def queryDBGasInca(session,initial_timestamp, final_timestamp):
     sensors = (GasInca.CO, GasInca.H2S, GasInca.SO2, GasInca.NO2,GasInca.O3, 
-                GasInca.PM25, GasInca.PM10, GasInca.SO2,GasInca.timestamp, GasInca.qhawax_id)
+                GasInca.PM25, GasInca.PM10, GasInca.SO2,GasInca.timestamp, GasInca.qhawax_id, GasInca.main_inca)
     
     return session.query(*sensors).filter(GasInca.timestamp >= initial_timestamp). \
                                     filter(GasInca.timestamp <= final_timestamp).all()
@@ -418,8 +407,6 @@ def queryDBPROM(session, qhawax_name, sensor, initial_timestamp, final_timestamp
         for i in range(len(resultado)):
             sum = sum + resultado[i][0]
         promf = sum /len(resultado)
-
-    #print('Imprimiendo promf', promf)
         
     return promf
 

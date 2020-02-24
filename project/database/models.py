@@ -296,6 +296,7 @@ class GasInca(db.Model):
     PM10 = db.Column(db.Float)
     SO2 = db.Column(db.Float)
     qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
+    main_inca = db.Column(db.Float)
 
 
 class AirQualityMeasurement(db.Model):
