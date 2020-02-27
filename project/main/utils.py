@@ -450,5 +450,35 @@ def queryGetEcaNoise(session, eca_noise_id):
     fields = (EcaNoise.id, EcaNoise.area_name, EcaNoise.max_daytime_limit, EcaNoise.max_night_limit)
     return session.query(*fields).filter(EcaNoise.id == eca_noise_id).one()
 
+#$
+def queryDBGasAverageMeasurement(session, qhawax_name, gas_name):
+    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
+    if qhawax_id is None:
+        return None
+
+    initial_timestamp = datetime.datetime.now() - datetime.timedelta(hours=5)
+    last_timestamp = datetime.datetime.now() - datetime.timedelta(hours=29)
+
+    if(gas_name=='CO'):
+        sensors = (AirQualityMeasurement.timestamp, AirQualityMeasurement.CO.label('sensor'))
+    elif(gas_name=='H2S'):
+        sensors = (AirQualityMeasurement.timestamp, AirQualityMeasurement.H2S.label('sensor'))
+    elif(gas_name=='NO2'):
+        sensors = (AirQualityMeasurement.timestamp, AirQualityMeasurement.NO2.label('sensor'))
+    elif(gas_name=='O3'):
+        sensors = (AirQualityMeasurement.timestamp, AirQualityMeasurement.O3.label('sensor'))
+    elif(gas_name=='PM25'):
+        sensors = (AirQualityMeasurement.timestamp, AirQualityMeasurement.PM25.label('sensor'))
+    elif(gas_name=='PM10'):
+        sensors = (AirQualityMeasurement.timestamp, AirQualityMeasurement.PM10.label('sensor'))
+    elif(gas_name=='SO2'):
+        sensors = (AirQualityMeasurement.timestamp, AirQualityMeasurement.SO2.label('sensor'))
+
+    return session.query(*sensors).filter(AirQualityMeasurement.qhawax_id == qhawax_id). \
+                               filter(AirQualityMeasurement.timestamp >= last_timestamp). \
+                               filter(AirQualityMeasurement.timestamp <= initial_timestamp). \
+                               order_by(AirQualityMeasurement.id.desc()).all()
 
 
+    
+    

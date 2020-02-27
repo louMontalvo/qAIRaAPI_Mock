@@ -49,3 +49,15 @@ def getAirQualityMeasurementsTimePeriod():
         return make_response(jsonify(air_quality_measurements_list), 200)
     else:
         return make_response(jsonify('Measurements not found'), 404)
+
+@app.route('/api/gas_average_measurement/', methods=['GET'])
+def getGasAverageMeasurementsEvery24():
+    qhawax_name = request.args.get('qhawax')
+    gas_name = request.args.get('gas')
+    gas_average_measurement = utils.queryDBGasAverageMeasurement(db.session, qhawax_name, gas_name)
+
+    if gas_average_measurement is not None:
+        gas_average_measurement_list = [measurement._asdict() for measurement in gas_average_measurement]
+        return make_response(jsonify(gas_average_measurement_list), 200)
+    else:
+        return make_response(jsonify('Measurements not found'), 404)
