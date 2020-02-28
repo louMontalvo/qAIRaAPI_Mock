@@ -52,7 +52,7 @@ def getOneQhawaxMiraflores():
 
 @app.route('/api/get_qhawax_msb/', methods=['GET'])
 def getQhawaxSanBorja():
-    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id).filter(or_(Qhawax.company_id == 4)).all()
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id, Qhawax.comercial_name).filter(or_(Qhawax.company_id == 4)).all()
     qhawax_list = [
         {'name': qhawax.name, 
         'location': qhawax._location,
@@ -60,12 +60,13 @@ def getQhawaxSanBorja():
         'main_inca': qhawax.main_inca,
         'qhawax_type': qhawax.qhawax_type,
         'state':qhawax.state,
-        'eca_noise_id': qhawax.eca_noise_id} for qhawax in all_qhawax]
+        'eca_noise_id': qhawax.eca_noise_id,
+        'comercial_name': qhawax.comercial_name} for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
 @app.route('/api/get_qhawax_miraflores/', methods=['GET'])
 def getQhawaxMiraflores():
-    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id).filter(or_(Qhawax.company_id == 8)).all()
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id, Qhawax.comercial_name).filter(or_(Qhawax.company_id == 8)).all()
     qhawax_list = [
         {'name': qhawax.name, 
         'location': qhawax._location,
@@ -73,12 +74,13 @@ def getQhawaxMiraflores():
         'main_inca': qhawax.main_inca,
         'qhawax_type': qhawax.qhawax_type,
         'state':qhawax.state,
-        'eca_noise_id': qhawax.eca_noise_id} for qhawax in all_qhawax]
+        'eca_noise_id': qhawax.eca_noise_id,
+        'comercial_name': qhawax.comercial_name} for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
 @app.route('/api/get_qhawax_cercado/', methods=['GET'])
 def getQhawaxCercadoLima():
-    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id).filter(or_(Qhawax.company_id == 3)).all()
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca, Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id,Qhawax.comercial_name).filter(or_(Qhawax.company_id == 3)).all()
     qhawax_list = [
         {'name': qhawax.name, 
         'location': qhawax._location,
@@ -86,12 +88,13 @@ def getQhawaxCercadoLima():
         'main_inca': qhawax.main_inca,
         'qhawax_type': qhawax.qhawax_type,
         'state':qhawax.state,
-        'eca_noise_id': qhawax.eca_noise_id} for qhawax in all_qhawax]
+        'eca_noise_id': qhawax.eca_noise_id,
+        'comercial_name': qhawax.comercial_name} for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
 @app.route('/api/get_all_qhawax/', methods=['GET'])
 def getAllQhawax():
-    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca,Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id).order_by(Qhawax.name).all()
+    all_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca,Qhawax.qhawax_type, Qhawax.state, Qhawax.eca_noise_id, Qhawax.comercial_name).order_by(Qhawax.name).all()
     qhawax_list = [
         {'name': qhawax.name, 
         'location': qhawax._location,
@@ -99,19 +102,21 @@ def getAllQhawax():
         'main_inca': qhawax.main_inca,
         'qhawax_type': qhawax.qhawax_type,
         'state':qhawax.state,
-        'eca_noise_id': qhawax.eca_noise_id } for qhawax in all_qhawax]
+        'eca_noise_id': qhawax.eca_noise_id,
+        'comercial_name': qhawax.comercial_name } for qhawax in all_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
 @app.route('/api/get_all_active_qhawax/', methods=['GET'])
 def getActiveQhawax():
-    all_active_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca,Qhawax.qhawax_type, Qhawax.eca_noise_id).order_by(Qhawax.name).filter((Qhawax.state == 'ON')).all()
+    all_active_qhawax = db.session.query(Qhawax.name, Qhawax._location, Qhawax.main_aqi, Qhawax.main_inca,Qhawax.qhawax_type, Qhawax.eca_noise_id,Qhawax.comercial_name).order_by(Qhawax.name).filter((Qhawax.state == 'ON')).all()
     qhawax_list = [
         {'name': qhawax.name, 
         'location': qhawax._location,
         'main_aqi': qhawax.main_aqi,
         'main_inca': qhawax.main_inca,
         'qhawax_type': qhawax.qhawax_type,
-        'eca_noise_id': qhawax.eca_noise_id } for qhawax in all_active_qhawax]
+        'eca_noise_id': qhawax.eca_noise_id,
+        'comercial_name': qhawax.comercial_name  } for qhawax in all_active_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
 @app.route('/api/save_location/', methods=['POST'])
