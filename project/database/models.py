@@ -93,6 +93,8 @@ class Qhawax(db.Model):
     
     gas_inca = db.relationship('GasInca', backref='qhawax', lazy='subquery',
                                                 cascade='delete, delete-orphan')
+    qhawax_installation_historys = db.relationship('QhawaxInstallationHistory', backref='qhawax', lazy='subquery',
+                                                cascade='delete, delete-orphan')
 
     def __init__(self, company, name, location, qhawax_type,state,eca_noise,comercial_name):
         utils.checkValidCompany(company)
@@ -331,5 +333,25 @@ class EcaNoise(db.Model):
     max_night_limit = db.Column(db.Integer)
     qhawaxes = db.relationship('Qhawax', backref='eca_noise', lazy='subquery',
                              cascade='delete, delete-orphan') 
+
+class QhawaxInstallationHistory(db.Model):
+    __tablename__ = 'qhawax_installation_history'
+
+    # Column's definition
+    id = db.Column(db.Integer, primary_key=True)
+    lat = db.Column(db.Float)
+    lon = db.Column(db.Float)
+    instalation_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    link_report = db.Column(db.String(500), nullable=False, unique=True)
+    observations = db.Column(db.String(300), nullable=False, unique=True)
+    qhawax_id = db.Column(db.Integer, db.ForeignKey('qhawax.id'))
+    district = db.Column(db.String(300), nullable=False, unique=True)
+    comercial_name = db.Column(db.String(300), nullable=False, unique=True)
+    address = db.Column(db.String(300), nullable=False, unique=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+    eca_noise_id = db.Column(db.Integer, db.ForeignKey('eca_noise.id'))
+    
+
 
 import project.database.utils as utils

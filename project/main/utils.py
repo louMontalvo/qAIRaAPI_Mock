@@ -3,7 +3,7 @@ import dateutil
 import dateutil.parser
 import time
 
-from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise, GasInca
+from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise, GasInca, QhawaxInstallationHistory
 from project.database.utils import Location
 
 elapsed_time = None
@@ -479,6 +479,22 @@ def queryDBGasAverageMeasurement(session, qhawax_name, gas_name):
                                filter(AirQualityMeasurement.timestamp <= initial_timestamp). \
                                order_by(AirQualityMeasurement.id.desc()).all()
 
+def storeNewQhawaxInstallation(session, data):
+    installation_data = {'lat': data['lat'], 'lon': data['lon'], 'instalation_date': data['instalation_date'], 'link_report': data['link_report'], 
+             'observations': data['observations'], 'district': data['district'],'comercial_name': data['comercial_name'],'address':data['address'],
+             'company_id': data['company_id'],'eca_noise_id':data['eca_noise_id'], 'qhawax_id':data['qhawax_id']}
+    qhawax_installation = QhawaxInstallationHistory(**installation_data)
+    session.add(qhawax_installation)
+    session.commit()
+ 
+def saveEndWorkFieldDate(session, installation_id,end_date):
+    session.query(QhawaxInstallationHistory).filter_by(id=installation_id).update(values={'end_date': end_date})
+    session.commit()
 
-    
+def queryQhawaxInField(session):
+    sensors = (QhawaxInstallationHistory.id, QhawaxInstallationHistory.qhawax_id, 
+             QhawaxInstallationHistory.comercial_name, QhawaxInstallationHistory.company_id,QhawaxInstallationHistory.instalation_date)
+
+    return session.query(*sensors).filter(QhawaxInstallationHistory.end_date.isnot(None)). \
+                                    order_by(QhawaxInstallationHistory.instalation_date.desc()).all()
     

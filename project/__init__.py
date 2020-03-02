@@ -21,9 +21,9 @@ login_manager.init_app(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
 
-from project.main import gas_sensor, processed_measurement, qhawax, air_quality, raw_measurement,eca_noise, gas_inca
+from project.main import gas_sensor, processed_measurement, qhawax, air_quality, raw_measurement,eca_noise, gas_inca, qhawax_installation_history
 import project.database.models as models
-from project.database.models import Company, User, Qhawax , ProcessedMeasurement, AirQualityMeasurement, RawMeasurement, EcaNoise, GasInca
+from project.database.models import Company, User, Qhawax , ProcessedMeasurement, AirQualityMeasurement, RawMeasurement, EcaNoise, GasInca, QhawaxInstallationHistory
 
 db.create_all()
 
