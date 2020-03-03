@@ -14,6 +14,8 @@ class Company(db.Model):
                             cascade='delete, delete-orphan')
     qhawaxes = db.relationship('Qhawax', backref='company', lazy='subquery',
                              cascade='delete, delete-orphan')
+    installations = db.relationship('QhawaxInstallationHistory', backref='company', lazy='subquery',
+                             cascade='delete, delete-orphan')
 
     def __init__(self, name, email_group):
         utils.checkValidEmailGroup(email_group)
@@ -333,6 +335,8 @@ class EcaNoise(db.Model):
     max_night_limit = db.Column(db.Integer)
     qhawaxes = db.relationship('Qhawax', backref='eca_noise', lazy='subquery',
                              cascade='delete, delete-orphan') 
+    installations = db.relationship('QhawaxInstallationHistory', backref='eca_noise', lazy='subquery',
+                             cascade='delete, delete-orphan') 
 
 class QhawaxInstallationHistory(db.Model):
     __tablename__ = 'qhawax_installation_history'
@@ -351,7 +355,43 @@ class QhawaxInstallationHistory(db.Model):
     address = db.Column(db.String(300), nullable=False, unique=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
     eca_noise_id = db.Column(db.Integer, db.ForeignKey('eca_noise.id'))
-    
+    connection_type = db.Column(db.String(300), nullable=False, unique=True)
+    index_type = db.Column(db.String(100), nullable=False, unique=True)
+    measuring_height = db.Column(db.Integer)
+    season = db.Column(db.String(300), nullable=False, unique=True)
+    #cleaning_area = db.relationship('QhawaxCleaningArea', backref='installation', lazy='subquery',
+    #                         cascade='delete, delete-orphan')
+    #cleaning_equipment = db.relationship('QhawaxCleaningEquipment', backref='installation', lazy='subquery',
+    #                         cascade='delete, delete-orphan') 
+    #maintenance = db.relationship('QhawaxMaintenance', backref='installation', lazy='subquery',
+    #                         cascade='delete, delete-orphan') 
 
+class QhawaxCleaningArea(db.Model):
+    __tablename__ = 'qhawax_cleaning_area'
+
+    # Column's definition
+    id = db.Column(db.Integer, primary_key=True)
+    installation_id = db.Column(db.Integer, db.ForeignKey('installation.id'))
+    cleaning_area_date = db.Column(db.DateTime, nullable=False)
+    comments = db.Column(db.String(500), nullable=False, unique=True)
+
+
+class QhawaxCleaningEquipment(db.Model):
+    __tablename__ = 'qhawax_cleaning_equipment'
+
+    # Column's definition
+    id = db.Column(db.Integer, primary_key=True)
+    installation_id = db.Column(db.Integer, db.ForeignKey('installation.id'))
+    cleaning_equipment_date = db.Column(db.DateTime, nullable=False)
+    comments = db.Column(db.String(500), nullable=False, unique=True)
+
+class QhawaxMaintenance(db.Model):
+    __tablename__ = 'qhawax_maintenance'
+
+    # Column's definition
+    id = db.Column(db.Integer, primary_key=True)
+    installation_id = db.Column(db.Integer, db.ForeignKey('installation.id'))
+    maintenance_date = db.Column(db.DateTime, nullable=False)
+    comments = db.Column(db.String(500), nullable=False, unique=True)
 
 import project.database.utils as utils

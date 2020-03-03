@@ -3,7 +3,7 @@ import dateutil
 import dateutil.parser
 import time
 
-from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise, GasInca, QhawaxInstallationHistory
+from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise, GasInca, QhawaxInstallationHistory, Company
 from project.database.utils import Location
 
 elapsed_time = None
@@ -482,7 +482,8 @@ def queryDBGasAverageMeasurement(session, qhawax_name, gas_name):
 def storeNewQhawaxInstallation(session, data):
     installation_data = {'lat': data['lat'], 'lon': data['lon'], 'instalation_date': data['instalation_date'], 'link_report': data['link_report'], 
              'observations': data['observations'], 'district': data['district'],'comercial_name': data['comercial_name'],'address':data['address'],
-             'company_id': data['company_id'],'eca_noise_id':data['eca_noise_id'], 'qhawax_id':data['qhawax_id']}
+             'company_id': data['company_id'],'eca_noise_id':data['eca_noise_id'], 'qhawax_id':data['qhawax_id'],'connection_type':data['connection_type'],
+             'index_type':data['index_type'],'measuring_height':data['measuring_height'], 'season':data['season'] }
     qhawax_installation = QhawaxInstallationHistory(**installation_data)
     session.add(qhawax_installation)
     session.commit()
@@ -495,6 +496,12 @@ def queryQhawaxInField(session):
     sensors = (QhawaxInstallationHistory.id, QhawaxInstallationHistory.qhawax_id, 
              QhawaxInstallationHistory.comercial_name, QhawaxInstallationHistory.company_id,QhawaxInstallationHistory.instalation_date)
 
-    return session.query(*sensors).filter(QhawaxInstallationHistory.end_date.isnot(None)). \
+    return session.query(*sensors).filter(QhawaxInstallationHistory.end_date == None). \
                                     order_by(QhawaxInstallationHistory.instalation_date.desc()).all()
+
+def getCompanyName(session, qhawax_in_field_list):
+    for installation in qhawax_in_field_list:
+        company_name= session.query(Company.name).filter_by(id=installation['company_id']).first()[0]
+        installation['company_name'] = company_name
+    return qhawax_in_field_list
     

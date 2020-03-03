@@ -16,7 +16,6 @@ from flask_socketio import join_room
 def newQhawaxInstallation():
     try:
         data_json = request.get_json()
-        print(data_json)
         utils.storeNewQhawaxInstallation(db.session, data_json)
         return make_response('OK', 200)
     except Exception as e:
@@ -40,6 +39,7 @@ def getAllQhawaxInField():
 
     if qhawax_in_field is not None:
         qhawax_in_field_list = [installation._asdict() for installation in qhawax_in_field]
+        qhawax_in_field_list= utils.getCompanyName(db.session, qhawax_in_field_list)
         return make_response(jsonify(qhawax_in_field_list), 200)
 
     else:
