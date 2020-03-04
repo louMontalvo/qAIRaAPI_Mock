@@ -1,4 +1,4 @@
- from flask_login import current_user, login_required, login_user, logout_user
+from flask_login import current_user, login_required, login_user, logout_user
 from flask import jsonify, make_response, redirect, render_template, \
     request, url_for
 import datetime
@@ -15,13 +15,14 @@ import base64
 
 @app.route('/api/login/', methods=['GET'])
 def login():
-	email = request.args.get('email')
-	password = request.args.get('password')
-	print(password)
-	user = db.session.query(User).filter_by(email=email).first()
-	if user and user.validatePassword(password):
+	email_encripted = request.args.get('email')
+	email_decoded = base64.b64decode(email_encripted).decode("utf-8")
+	password_encripted = request.args.get('password')
+	pass_decoded = base64.b64decode(password_encripted).decode("utf-8")
+	user = db.session.query(User).filter_by(email=email_decoded).first()
+	if user and user.validatePassword(pass_decoded):
 		#Dame el nombre y id del usuario
-		username = email[:email.find('@')]
+		username = email_decoded[:email_decoded.find('@')]
 		user_id = user.id
 		company_id = user.company_id
 		#Dame el nombre y id de la compania del usuario
