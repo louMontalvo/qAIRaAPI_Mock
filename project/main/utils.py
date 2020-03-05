@@ -506,9 +506,17 @@ def getCompanyName(session, qhawax_in_field_list):
     return qhawax_in_field_list
 
 def queryQhawaxInFieldByCompany(session,company_id):
-    sensors = (QhawaxInstallationHistory.id, QhawaxInstallationHistory.qhawax_id, 
-             QhawaxInstallationHistory.comercial_name, QhawaxInstallationHistory.instalation_date)
+    sensors = (QhawaxInstallationHistory.qhawax_id, QhawaxInstallationHistory.comercial_name, 
+                QhawaxInstallationHistory.lat, QhawaxInstallationHistory.lon, QhawaxInstallationHistory.eca_noise_id)
 
-    return session.query(*sensors).filter(QhawaxInstallationHistory.company_id == company_id). \
-                                    order_by(QhawaxInstallationHistory.instalation_date.desc()).all()
+    return session.query(*sensors).filter(QhawaxInstallationHistory.company_id == company_id).all()
+
+def getQhawaxDetail(session, qhawax_in_field_by_company_list):
+    for qhawax_detail in qhawax_in_field_by_company_list:
+        qhawax_detail['qhawax_state']= session.query(Qhawax.state).filter_by(id=qhawax_detail['qhawax_id']).first()[0]
+        qhawax_detail['qhawax_type'] = session.query(Qhawax.qhawax_type).filter_by(id=qhawax_detail['qhawax_id']).first()[0]
+        qhawax_detail['qhawax_name'] = session.query(Qhawax.name).filter_by(id=qhawax_detail['qhawax_id']).first()[0]
+        qhawax_detail['main_inca']   = session.query(GasInca.main_inca).filter_by(qhawax_id=qhawax_detail['qhawax_id']).\
+                                                    order_by(GasInca.id.desc()).first()[0]
+    return qhawax_in_field_by_company_list
     
