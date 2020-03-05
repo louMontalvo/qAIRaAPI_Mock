@@ -504,4 +504,11 @@ def getCompanyName(session, qhawax_in_field_list):
         company_name= session.query(Company.name).filter_by(id=installation['company_id']).first()[0]
         installation['company_name'] = company_name
     return qhawax_in_field_list
+
+def queryQhawaxInFieldByCompany(session,company_id):
+    sensors = (QhawaxInstallationHistory.id, QhawaxInstallationHistory.qhawax_id, 
+             QhawaxInstallationHistory.comercial_name, QhawaxInstallationHistory.instalation_date)
+
+    return session.query(*sensors).filter(QhawaxInstallationHistory.company_id == company_id). \
+                                    order_by(QhawaxInstallationHistory.instalation_date.desc()).all()
     
