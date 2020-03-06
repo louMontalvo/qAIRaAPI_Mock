@@ -487,7 +487,15 @@ def storeNewQhawaxInstallation(session, data):
     qhawax_installation = QhawaxInstallationHistory(**installation_data)
     session.add(qhawax_installation)
     session.commit()
+
+def setOccupiedQhawax(session,qhawax_id):
+    session.query(Qhawax).filter_by(id=qhawax_id).update(values={'availability': 'Occupied'})
+    session.commit()
  
+def setAvailableQhawax(session,qhawax_id):
+    session.query(Qhawax).filter_by(id=qhawax_id).update(values={'availability': 'Available'})
+    session.commit()
+
 def saveEndWorkFieldDate(session, installation_id,end_date):
     session.query(QhawaxInstallationHistory).filter_by(id=installation_id).update(values={'end_date': end_date})
     session.commit()
@@ -508,8 +516,8 @@ def getCompanyName(session, qhawax_in_field_list):
 def queryQhawaxInFieldByCompany(session,company_id):
     sensors = (QhawaxInstallationHistory.qhawax_id, QhawaxInstallationHistory.comercial_name, 
                 QhawaxInstallationHistory.lat, QhawaxInstallationHistory.lon, QhawaxInstallationHistory.eca_noise_id)
-
-    return session.query(*sensors).filter(QhawaxInstallationHistory.company_id == company_id).all()
+    return session.query(*sensors).filter(QhawaxInstallationHistory.company_id == company_id). \
+                                   filter(QhawaxInstallationHistory.end_date == None).all()
 
 def getQhawaxDetail(session, qhawax_in_field_by_company_list):
     for qhawax_detail in qhawax_in_field_by_company_list:
@@ -519,4 +527,8 @@ def getQhawaxDetail(session, qhawax_in_field_by_company_list):
         qhawax_detail['main_inca']   = session.query(GasInca.main_inca).filter_by(qhawax_id=qhawax_detail['qhawax_id']).\
                                                     order_by(GasInca.id.desc()).first()[0]
     return qhawax_in_field_by_company_list
+
+def getAvailableQhawax(session):
+    available_qhawax = db.session.query(Qhawax.id, Qhawax.name, Qhawax.qhawax_type, Qhawax.state).filter_by(availability='Available').all()
+    return available_qhawax
     

@@ -84,7 +84,7 @@ class Qhawax(db.Model):
     state = db.Column(db.String(5), nullable=False, unique=True)
     eca_noise_id = db.Column(db.Integer, db.ForeignKey('eca_noise.id'))
     comercial_name = db.Column(db.String(300), nullable=False, unique=True)
-    
+    availability = db.Column(db.String(100), nullable=False, unique=True)
     raw_measurements = db.relationship('RawMeasurement', backref='qhawax', lazy='subquery',
                                         cascade='delete, delete-orphan')
     processed_measurements = db.relationship('ProcessedMeasurement', backref='qhawax', lazy='subquery',
@@ -98,7 +98,7 @@ class Qhawax(db.Model):
     qhawax_installation_historys = db.relationship('QhawaxInstallationHistory', backref='qhawax', lazy='subquery',
                                                 cascade='delete, delete-orphan')
 
-    def __init__(self, company, name, location, qhawax_type,state,eca_noise,comercial_name):
+    def __init__(self, company, name, location, qhawax_type,state,eca_noise,comercial_name,availability):
         utils.checkValidCompany(company)
         self.company = company
         self.name = name
@@ -107,6 +107,7 @@ class Qhawax(db.Model):
         self.state = state
         self.eca_noise = eca_noise
         self.comercial_name = comercial_name
+        self.availability = availability
 
     @property
     def location(self):
@@ -127,7 +128,8 @@ class Qhawax(db.Model):
             'qhawax_type'   : self.qhawax_type,
             'state'         : self.state,
             'eca_noise_id'  : self.eca_noise_id,
-            'comercial_name': self.comercial_name}
+            'comercial_name': self.comercial_name,
+            'availability'  : self.availability}
 
 class GasSensor(db.Model):
     __tablename__ = 'gas_sensor'
