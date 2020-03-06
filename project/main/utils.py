@@ -531,4 +531,20 @@ def getQhawaxDetail(session, qhawax_in_field_by_company_list):
 def getAvailableQhawax(session):
     available_qhawax = db.session.query(Qhawax.id, Qhawax.name, Qhawax.qhawax_type, Qhawax.state).filter_by(availability='Available').all()
     return available_qhawax
+
+def queryQhawaxRecord(session, qhawax_id):
+    sensors = (QhawaxInstallationHistory.id, QhawaxInstallationHistory.comercial_name, 
+               QhawaxInstallationHistory.lat, QhawaxInstallationHistory.lon,
+               QhawaxInstallationHistory.address, QhawaxInstallationHistory.district,
+               QhawaxInstallationHistory.instalation_date, QhawaxInstallationHistory.end_date)
+    return session.query(*sensors).filter(QhawaxInstallationHistory.qhawax_id == qhawax_id). \
+                                   order_by(QhawaxInstallationHistory.id.desc()).all()
+
+def queryGetAreas(session):
+    sensors = (EcaNoise.id, EcaNoise.area_name)
+    return session.query(*sensors).order_by(EcaNoise.id.desc()).all()
+
+def queryGetCompanies(session):
+    sensors = (Company.id, Company.name)
+    return session.query(*sensors).order_by(Company.id.desc()).all()
     

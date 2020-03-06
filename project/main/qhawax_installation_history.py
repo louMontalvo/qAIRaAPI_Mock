@@ -68,14 +68,13 @@ def getAvailableQhawax():
         'id': qhawax.id} for qhawax in available_qhawax]
     return make_response(jsonify(qhawax_list), 200)
 
-#@app.route('/api/AllQhawaxRecord/', methods=['GET'])
-#def getAllQhawaxRecord():
-#    qhawax_id = request.args.get('qhawax_id')
-    #qhawax_in_field_by_company = utils.queryQhawaxInFieldByCompany(db.session, company_id)
-#    if qhawax_in_field_by_company is not None:
-#        qhawax_in_field_by_company_list = [installation._asdict() for installation in qhawax_in_field_by_company]
-#        qhawax_in_field_by_company_list= utils.getQhawaxDetail(db.session, qhawax_in_field_by_company_list)
-#        return make_response(jsonify(qhawax_in_field_by_company_list), 200)
-#    else:
-#        return make_response(jsonify('Measurements not found'), 404)
+@app.route('/api/AllQhawaxRecord/', methods=['GET'])
+def getAllQhawaxRecord():
+    qhawax_id = request.args.get('qhawax_id')
+    all_qhawax_record = utils.queryQhawaxRecord(db.session, qhawax_id)
+    if all_qhawax_record is not None:
+        all_qhawax_record_list = [installation._asdict() for installation in all_qhawax_record]
+        return make_response(jsonify(all_qhawax_record_list), 200)
+    else:
+        return make_response(jsonify('Measurements not found'), 404)
 
