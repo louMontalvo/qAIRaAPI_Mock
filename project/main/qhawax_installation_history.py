@@ -50,6 +50,7 @@ def getAllQhawaxInField():
 @app.route('/api/AllQhawaxByCompany/', methods=['GET'])
 def getQhawaxByCompany():
     company_id = request.args.get('company_id')
+    #Sino solo traer los qhawax de dicha compañia
     qhawax_in_field_by_company = utils.queryQhawaxInFieldByCompany(db.session, company_id)
     if qhawax_in_field_by_company is not None:
         qhawax_in_field_by_company_list = [installation._asdict() for installation in qhawax_in_field_by_company]

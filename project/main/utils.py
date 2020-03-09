@@ -515,9 +515,11 @@ def getCompanyName(session, qhawax_in_field_list):
 
 def queryQhawaxInFieldByCompany(session,company_id):
     sensors = (QhawaxInstallationHistory.qhawax_id, QhawaxInstallationHistory.comercial_name, 
-                QhawaxInstallationHistory.lat, QhawaxInstallationHistory.lon, QhawaxInstallationHistory.eca_noise_id)
+                    QhawaxInstallationHistory.lat, QhawaxInstallationHistory.lon, QhawaxInstallationHistory.eca_noise_id)
+    if(int(company_id) == 1):
+        return session.query(*sensors).filter(QhawaxInstallationHistory.end_date == None).all()  
     return session.query(*sensors).filter(QhawaxInstallationHistory.company_id == company_id). \
-                                   filter(QhawaxInstallationHistory.end_date == None).all()
+                                       filter(QhawaxInstallationHistory.end_date == None).all()
 
 def getQhawaxDetail(session, qhawax_in_field_by_company_list):
     for qhawax_detail in qhawax_in_field_by_company_list:
