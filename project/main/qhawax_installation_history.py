@@ -45,7 +45,7 @@ def getAllQhawaxInField():
         qhawax_in_field_list= utils.getCompanyName(db.session, qhawax_in_field_list)
         return make_response(jsonify(qhawax_in_field_list), 200)
     else:
-        return make_response(jsonify('Measurements not found'), 404)
+        return make_response(jsonify('Qhawax in Field not found'), 404)
 
 @app.route('/api/AllQhawaxByCompany/', methods=['GET'])
 def getQhawaxByCompany():
@@ -57,7 +57,7 @@ def getQhawaxByCompany():
         qhawax_in_field_by_company_list= utils.getQhawaxDetail(db.session, qhawax_in_field_by_company_list)
         return make_response(jsonify(qhawax_in_field_by_company_list), 200)
     else:
-        return make_response(jsonify('Measurements not found'), 404)
+        return make_response(jsonify('Qhawax By Company not found'), 404)
 
 @app.route('/api/AllAvailableQhawax/', methods=['GET'])
 def getAvailableQhawax():
@@ -77,5 +77,29 @@ def getAllQhawaxRecord():
         all_qhawax_record_list = [installation._asdict() for installation in all_qhawax_record]
         return make_response(jsonify(all_qhawax_record_list), 200)
     else:
-        return make_response(jsonify('Measurements not found'), 404)
+        return make_response(jsonify('Qhawax Record not found'), 404)
+
+@app.route('/api/QhawaxInstallationDetail/', methods=['GET'])
+def getQhawaxInstallationDetail():
+    installation_id = request.args.get('installation_id')
+    qhawax_detail = utils.queryQhawaxInstallationDetail(db.session, installation_id)
+    if qhawax_detail is not None:
+        detail_list = [detail._asdict() for detail in qhawax_detail]
+        return make_response(jsonify(detail_list), 200)
+    else:
+        return make_response(jsonify('Qhawax Detail not found'), 404)
+
+@app.route('/api/DatesofActiveQhawax/', methods=['GET'])
+def getDatesofActiveQhawax():
+    qhawax_dates = utils.queryDateOfActiveQhawax(db.session)
+    if qhawax_dates is not None:
+        qhawax_dates_list = [dates._asdict() for dates in qhawax_dates]
+        return make_response(jsonify(qhawax_dates_list), 200)
+    else:
+        return make_response(jsonify('Qhawax Dates not found'), 404)
+
+
+
+
+
 

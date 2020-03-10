@@ -553,4 +553,35 @@ def queryGetAreas(session):
 def queryGetCompanies(session):
     sensors = (Company.id, Company.name)
     return session.query(*sensors).order_by(Company.id.desc()).all()
+
+def queryQhawaxInstallationDetail(session, installation_id):
+    sensors = (QhawaxInstallationHistory.id, QhawaxInstallationHistory.comercial_name, 
+               QhawaxInstallationHistory.lat, QhawaxInstallationHistory.lon,
+               QhawaxInstallationHistory.address, QhawaxInstallationHistory.district,
+               QhawaxInstallationHistory.instalation_date, QhawaxInstallationHistory.end_date,
+               QhawaxInstallationHistory.link_report,QhawaxInstallationHistory.qhawax_id,
+               QhawaxInstallationHistory.connection_type, QhawaxInstallationHistory.index_type, 
+               QhawaxInstallationHistory.measuring_height, QhawaxInstallationHistory.season,
+               QhawaxInstallationHistory.last_maintenance_date, QhawaxInstallationHistory.last_cleaning_area_date ,
+               QhawaxInstallationHistory.last_cleaning_equipment_date)
+    return session.query(*sensors).filter(QhawaxInstallationHistory.id == installation_id).all()
+
+def queryDateOfActiveQhawax(session):
+    sensors = (QhawaxInstallationHistory.id,QhawaxInstallationHistory.instalation_date, QhawaxInstallationHistory.end_date,
+               QhawaxInstallationHistory.last_maintenance_date, QhawaxInstallationHistory.last_cleaning_area_date ,
+               QhawaxInstallationHistory.last_cleaning_equipment_date,QhawaxInstallationHistory.qhawax_id,
+               QhawaxInstallationHistory.comercial_name)
+    return session.query(*sensors).filter(QhawaxInstallationHistory.end_date == None).all()
+
+def getCleaningEquipmentQhawaxDate(session, installation_id):
+    return session.query(QhawaxInstallationHistory.last_cleaning_equipment_date).filter(QhawaxInstallationHistory.id == installation_id).first()[0]
+
+def getCleaningAreaQhawaxDate(session, installation_id):
+    return session.query(QhawaxInstallationHistory.last_cleaning_area_date).filter(QhawaxInstallationHistory.id == installation_id).first()[0]
+
+def getMaintenanceQhawaxDate(session, installation_id):
+    return session.query(QhawaxInstallationHistory.last_maintenance_date).filter(QhawaxInstallationHistory.id == installation_id).first()[0]
+
+def getInstallationQhawaxDate(session, installation_id):
+    return session.query(QhawaxInstallationHistory.instalation_date).filter(QhawaxInstallationHistory.id == installation_id).first()[0]
     

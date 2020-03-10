@@ -361,6 +361,9 @@ class QhawaxInstallationHistory(db.Model):
     index_type = db.Column(db.String(100), nullable=False, unique=True)
     measuring_height = db.Column(db.Integer)
     season = db.Column(db.String(300), nullable=False, unique=True)
+    last_maintenance_date = db.Column(db.DateTime, nullable=False)
+    last_cleaning_area_date = db.Column(db.DateTime, nullable=False)
+    last_cleaning_equipment_date = db.Column(db.DateTime, nullable=False)
     #cleaning_area = db.relationship('QhawaxCleaningArea', backref='installation', lazy='subquery',
     #                         cascade='delete, delete-orphan')
     #cleaning_equipment = db.relationship('QhawaxCleaningEquipment', backref='installation', lazy='subquery',
