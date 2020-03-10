@@ -306,6 +306,15 @@ def saveStatusOn(session, qhawax_id):
     session.query(Qhawax).filter_by(name=qhawax_id).update(values={'state': "ON",'main_inca':main_inca})
     session.commit()
 
+def saveTurnOnLastTime(session, qhawax_name):
+    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()
+    installation_id = session.query(QhawaxInstallationHistory.id).filter_by(qhawax_id=qhawax_id).\
+                             filter(QhawaxInstallationHistory.end_date == None). \
+                             order_by(QhawaxInstallationHistory.instalation_date.desc()).first()[0]
+    now = datetime.datetime.now()-datetime.timedelta(hours=5)
+    session.query(QhawaxInstallationHistory).filter_by(id=installation_id).update(values={'last_time_physically_turn_on': now.replace(tzinfo=None)})
+    session.commit()
+
 def saveLocationFromProductID(session, qhawax_id, lat, lon):
     new_location = Location(lat=lat, lon=lon)
     session.query(Qhawax).filter_by(name=qhawax_id).update(values={'_location': new_location.serialize})

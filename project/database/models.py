@@ -364,12 +364,7 @@ class QhawaxInstallationHistory(db.Model):
     last_maintenance_date = db.Column(db.DateTime, nullable=False)
     last_cleaning_area_date = db.Column(db.DateTime, nullable=False)
     last_cleaning_equipment_date = db.Column(db.DateTime, nullable=False)
-    #cleaning_area = db.relationship('QhawaxCleaningArea', backref='installation', lazy='subquery',
-    #                         cascade='delete, delete-orphan')
-    #cleaning_equipment = db.relationship('QhawaxCleaningEquipment', backref='installation', lazy='subquery',
-    #                         cascade='delete, delete-orphan') 
-    #maintenance = db.relationship('QhawaxMaintenance', backref='installation', lazy='subquery',
-    #                         cascade='delete, delete-orphan') 
+    last_time_physically_turn_on = db.Column(db.DateTime, nullable=False)
 
 class QhawaxCleaningArea(db.Model):
     __tablename__ = 'qhawax_cleaning_area'

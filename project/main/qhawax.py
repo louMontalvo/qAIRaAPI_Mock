@@ -245,6 +245,14 @@ def sendQhawaxStatusOn():
     req_json = request.get_json()
     qhawax_id = str(req_json['qhawax_name']).strip()    
     utils.saveStatusOn(db.session, qhawax_id)
+    utils.saveTurnOnLastTime(db.session, qhawax_id)
+    return make_response('Success', 200)
+
+@app.route('/api/qhawax_change_status_on_virtual/', methods=['POST'])
+def sendQhawaxStatusOnVirtual():
+    req_json = request.get_json()
+    qhawax_id = str(req_json['qhawax_name']).strip()    
+    utils.saveStatusOn(db.session, qhawax_id)
     return make_response('Success', 200)
 
 
