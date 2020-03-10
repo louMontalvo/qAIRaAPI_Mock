@@ -297,11 +297,13 @@ def getQhawaxStatus(session, qhawax_id):
     return state
 
 def saveStatusOff(session, qhawax_id):
-    session.query(Qhawax).filter_by(name=qhawax_id).update(values={'state': "OFF"})
+    session.query(Qhawax).filter_by(name=qhawax_id).update(values={'state': "OFF",'main_inca':None})
     session.commit()
 
 def saveStatusOn(session, qhawax_id):
-    session.query(Qhawax).filter_by(name=qhawax_id).update(values={'state': "ON"})
+    main_inca= session.query(GasInca.main_inca).filter_by(qhawax_id=qhawax_id).\
+                                                    order_by(GasInca.id.desc()).first()[0]
+    session.query(Qhawax).filter_by(name=qhawax_id).update(values={'state': "ON",'main_inca':main_inca})
     session.commit()
 
 def saveLocationFromProductID(session, qhawax_id, lat, lon):
@@ -445,7 +447,6 @@ def getQhawaxLatestTimestampProcessedMeasurement(session, qhawax_name):
 def getQhawaxLatestCoordinatesFromName(session, qhawax_name):
     return session.query(Qhawax._location).filter_by(name=qhawax_name).first()
 
-
 def queryGetEcaNoise(session, eca_noise_id):
     fields = (EcaNoise.id, EcaNoise.area_name, EcaNoise.max_daytime_limit, EcaNoise.max_night_limit)
     return session.query(*fields).filter(EcaNoise.id == eca_noise_id).one()
@@ -526,7 +527,10 @@ def getQhawaxDetail(session, qhawax_in_field_by_company_list):
         qhawax_detail['qhawax_state']= session.query(Qhawax.state).filter_by(id=qhawax_detail['qhawax_id']).first()[0]
         qhawax_detail['qhawax_type'] = session.query(Qhawax.qhawax_type).filter_by(id=qhawax_detail['qhawax_id']).first()[0]
         qhawax_detail['qhawax_name'] = session.query(Qhawax.name).filter_by(id=qhawax_detail['qhawax_id']).first()[0]
-        qhawax_detail['main_inca']   = session.query(GasInca.main_inca).filter_by(qhawax_id=qhawax_detail['qhawax_id']).\
+        if(qhawax_detail['qhawax_state']=='OFF'):
+            qhawax_detail['main_inca']   = session.query(Qhawax.main_inca).filter_by(id=qhawax_detail['qhawax_id']).first()[0]
+        else:
+            qhawax_detail['main_inca']   = session.query(GasInca.main_inca).filter_by(qhawax_id=qhawax_detail['qhawax_id']).\
                                                     order_by(GasInca.id.desc()).first()[0]
     return qhawax_in_field_by_company_list
 

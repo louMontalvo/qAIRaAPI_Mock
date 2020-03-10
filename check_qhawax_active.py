@@ -11,6 +11,7 @@ BASE_URL = 'http://127.0.0.1:8888/'
 GET_QHAWAX_ACTIVE = BASE_URL + 'api/get_all_active_qhawax/'
 GET_QHAWAX_TIMESTAMP_URL = BASE_URL + 'api/get_time_processed_data_active_qhawax/'
 CRITICAL_TELEMETRY_ALERT_URL = BASE_URL + 'api/qhawax_critical_processed_data_timestamp_alert/'
+TURN_OFF_URL = BASE_URL + 'api/qhawax_change_status_off/'
 
 def isQhawaxLostActivity(qhawax_lost_activity_timestamp_str, now_timestamp):
     return (now_timestamp - qhawax_lost_timestamp).total_seconds()/60 >= ALLOWED_TIME_MINUTES
@@ -21,6 +22,7 @@ for qhawax in json_data:
 	if(response_time.text!=""):
 		qhawax_lost_timestamp = dateutil.parser.parse(response_time.text)
 		if isQhawaxLostActivity(qhawax_lost_timestamp, datetime.datetime.now()-datetime.timedelta(hours=5)):
+			response_switch = requests.post(TURN_OFF_URL,json={'qhawax_name':qhawax['name']})
 			response = requests.post(CRITICAL_TELEMETRY_ALERT_URL, json={'qhawax_name' : qhawax['name'],'secret_key' : bcrypt.hash(SECRET_KEY)})
 	else:
 		print("No hay registros en el qhawax: " + qhawax['name'])
