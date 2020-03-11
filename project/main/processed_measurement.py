@@ -34,11 +34,13 @@ def handleProcessedData():
         product_id = data_json['ID']
         utils.storeProcessedDataInDB(db.session, data_json)
         qhawax_zone = utils.getNoiseData(db.session,product_id)
-
         data_json['timestamp'] = str(data_json['timestamp'])
         data_json['ID'] = product_id
         data_json['zone'] = qhawax_zone
-
+        qhawax_id = utils.getQhawaxId(db.session,product_id)
+        last_time_turn_on = utils.getLastTurnOnTimeQhawax(db.session,qhawax_id)
+        if(last_time_turn_on + datetime.timedelta(hours=2) < datetime.datetime.now()-datetime.timedelta(hours=5)):
+            utils.storeValidProcessedDataInDB(db.session, data_json, qhawax_id)
         socketio.emit('new_data_event_processed', data_json, room=product_id)
         socketio.emit('new_data_summary_processed', data_json)
         return make_response('OK', 200)

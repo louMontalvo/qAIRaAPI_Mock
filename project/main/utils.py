@@ -3,7 +3,7 @@ import dateutil
 import dateutil.parser
 import time
 
-from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise, GasInca, QhawaxInstallationHistory, Company
+from project.database.models import AirQualityMeasurement, GasSensor, ProcessedMeasurement, Qhawax, RawMeasurement, EcaNoise, GasInca, QhawaxInstallationHistory, Company, ValidProcessedMeasurement
 from project.database.utils import Location
 
 elapsed_time = None
@@ -44,6 +44,9 @@ def getNoiseData(session,qhawax_name):
     zone = session.query(EcaNoise.area_name).filter_by(id=eca_noise_id).first()[0]
     return zone
 
+def getQhawaxId(session, qhawax_name):
+    qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
+    return qhawax_id
 
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
@@ -55,6 +58,24 @@ def storeProcessedDataInDB(session, data):
        data['spl'] = (data['spl']-10)*10
     processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
     session.add(processed_measurement)
+    session.commit()
+
+def storeValidProcessedDataInDB(session, data, qhawax_id):
+    installation_id = session.query(QhawaxInstallationHistory.id).filter_by(qhawax_id=qhawax_id). \
+                                    filter(QhawaxInstallationHistory.end_date == None). \
+                                    order_by(QhawaxInstallationHistory.instalation_date.desc()).first()[0]
+    data['PM1'] = data['PM1']/3
+    data['PM25'] = data['PM25']/3
+    data['PM10'] = data['PM10']/3
+    if(qhawax_id==7 or qhawax_id==8):
+       data['spl'] = (data['spl']-10)*10
+    valid_data = {'timestamp': data['timestamp'],'CO': data['CO'], 'H2S': data['H2S'],'SO2': data['SO2'],
+                'NO2': data['NO2'],'O3': data['O3'],'PM25': data['PM25'], 'VOC': data['VOC'],
+                'PM1': data['PM1'],'PM10': data['PM10'],'UV': data['UV'],'UVA': data['UVA'],'UVB': data['UVB'],
+                'SPL': data['spl'],'humidity': data['humidity'],'pressure': data['pressure'],'temperature': data['temperature'],
+                'lat':data['lat'],'lon':data['lon']}
+    valid_processed_measurement = ValidProcessedMeasurement(**valid_data, qhawax_installation_id=installation_id)
+    session.add(valid_processed_measurement)
     session.commit()
 
 def storeGasIncaInDB(session, data):
@@ -593,4 +614,7 @@ def getMaintenanceQhawaxDate(session, installation_id):
 
 def getInstallationQhawaxDate(session, installation_id):
     return session.query(QhawaxInstallationHistory.instalation_date).filter(QhawaxInstallationHistory.id == installation_id).first()[0]
+
+def getLastTurnOnTimeQhawax(session, qhawax_id):
+    return session.query(QhawaxInstallationHistory.last_time_physically_turn_on).filter(QhawaxInstallationHistory.qhawax_id == qhawax_id).first()[0]
     

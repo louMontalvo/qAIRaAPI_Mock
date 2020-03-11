@@ -365,7 +365,9 @@ class QhawaxInstallationHistory(db.Model):
     last_cleaning_area_date = db.Column(db.DateTime, nullable=False)
     last_cleaning_equipment_date = db.Column(db.DateTime, nullable=False)
     last_time_physically_turn_on = db.Column(db.DateTime, nullable=False)
-
+    valid_processed_measurements = db.relationship('ValidProcessedMeasurement', backref='qhawax_installation_history', lazy='subquery',
+                                                cascade='delete, delete-orphan')
+    
 class QhawaxCleaningArea(db.Model):
     __tablename__ = 'qhawax_cleaning_area'
 
@@ -374,7 +376,6 @@ class QhawaxCleaningArea(db.Model):
     installation_id = db.Column(db.Integer, db.ForeignKey('installation.id'))
     cleaning_area_date = db.Column(db.DateTime, nullable=False)
     comments = db.Column(db.String(500), nullable=False, unique=True)
-
 
 class QhawaxCleaningEquipment(db.Model):
     __tablename__ = 'qhawax_cleaning_equipment'
@@ -393,5 +394,34 @@ class QhawaxMaintenance(db.Model):
     installation_id = db.Column(db.Integer, db.ForeignKey('installation.id'))
     maintenance_date = db.Column(db.DateTime, nullable=False)
     comments = db.Column(db.String(500), nullable=False, unique=True)
+
+class ValidProcessedMeasurement(db.Model):
+    __tablename__ = 'valid_processed_measurement'
+
+    # Column's definition
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    CO = db.Column(db.Float)
+    CO2 = db.Column(db.Float)
+    H2S = db.Column(db.Float)
+    NO = db.Column(db.Float)
+    NO2 = db.Column(db.Float)
+    O3 = db.Column(db.Float)
+    PM1 = db.Column(db.Float)
+    PM25 = db.Column(db.Float)
+    PM10 = db.Column(db.Float)
+    SO2 = db.Column(db.Float)
+    VOC = db.Column(db.Float)
+    UV = db.Column(db.Float)
+    UVA = db.Column(db.Float)
+    UVB = db.Column(db.Float)
+    SPL = db.Column(db.Float)
+    humidity = db.Column(db.Float)
+    pressure = db.Column(db.Float)
+    temperature = db.Column(db.Float)
+    lat = db.Column(db.Float)
+    lon = db.Column(db.Float)
+    alt = db.Column(db.Float)
+    qhawax_installation_id = db.Column(db.Integer, db.ForeignKey('qhawax_installation_history.id'))
 
 import project.database.utils as utils
