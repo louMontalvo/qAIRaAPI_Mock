@@ -51,10 +51,7 @@ def getQhawaxId(session, qhawax_name):
 def storeProcessedDataInDB(session, data):
     qhawax_name = data.pop('ID', None)
     qhawax_id = session.query(Qhawax.id).filter_by(name=qhawax_name).first()[0]
-    data['PM1'] = data['PM1']/3
-    data['PM25'] = data['PM25']/3
-    data['PM10'] = data['PM10']/3
-    if(qhawax_id==7 or qhawax_id==8):
+    if(qhawax_id==8):
        data['spl'] = (data['spl']-10)*10
     processed_measurement = ProcessedMeasurement(**data, qhawax_id=qhawax_id)
     session.add(processed_measurement)
@@ -64,10 +61,7 @@ def storeValidProcessedDataInDB(session, data, qhawax_id):
     installation_id = session.query(QhawaxInstallationHistory.id).filter_by(qhawax_id=qhawax_id). \
                                     filter(QhawaxInstallationHistory.end_date == None). \
                                     order_by(QhawaxInstallationHistory.instalation_date.desc()).first()[0]
-    data['PM1'] = data['PM1']/3
-    data['PM25'] = data['PM25']/3
-    data['PM10'] = data['PM10']/3
-    if(qhawax_id==7 or qhawax_id==8):
+    if(qhawax_id==8):
        data['spl'] = (data['spl']-10)*10
     valid_data = {'timestamp': data['timestamp'],'CO': data['CO'], 'H2S': data['H2S'],'SO2': data['SO2'],
                 'NO2': data['NO2'],'O3': data['O3'],'PM25': data['PM25'], 'VOC': data['VOC'],
